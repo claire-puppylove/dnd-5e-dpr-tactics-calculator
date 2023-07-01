@@ -111,7 +111,7 @@ Average Round Damage is still not structured reference.
 
 ## References
 
-- [DnD 5e - Damage per Round](https://rpgbot.net/dnd5/characters/damage-per-round/): Most of the formulas I obtained from this guide. However, RPGBOT's calculator uses Min to Hit instead of modifiers against enemy AC. I did some calculations of my own to figure out the formula used there.
+- [DnD 5e - Damage per Round | RPGBOT](https://rpgbot.net/dnd5/characters/damage-per-round/): Most of the formulas I obtained from this guide. However, RPGBOT's calculator uses Min to Hit instead of modifiers against enemy AC. I did some calculations of my own to figure out the formula used there.
 - [DnD 5e – DPR Calculator | RPGBOT](https://rpgbot.net/dnd5/tools/dpr-calculator/): I actually got my inspiration for this project by using this calculator and realizing I had bigger plans than I could type in my cellphone.
 - [DnD 5e – The Fundamental Math of Character Optimization | RPGBOT](https://rpgbot.net/dnd5/characters/fundamental_math/): Helped me establish the DPR rating calculations.
-- [Comprehensive DPR Calculator](https://forums.giantitp.com/showthread.php?582779-Comprehensive-DPR-Calculator-(v2-0)) and it's [documentation](https://docs.google.com/document/u/1/d/11eTMZPPxWXHY0rQEhK1msO-40BcCGrzArSl4GX4CiJE/edit?pli=1) helped me figure out the formulas for Halfling luck and for Elven Accuracy. It also made me realize I need to add Great Weapon Master feat to the calculations as an option.
+- [Comprehensive DPR Calculator | LudicSavant](https://forums.giantitp.com/showthread.php?582779-Comprehensive-DPR-Calculator-(v2-0)) and it's [documentation](https://docs.google.com/document/u/1/d/11eTMZPPxWXHY0rQEhK1msO-40BcCGrzArSl4GX4CiJE/edit?pli=1) helped me figure out the formulas for Halfling luck and for Elven Accuracy. It also made me realize I need to add Great Weapon Master feat to the calculations as an option.
