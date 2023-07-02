@@ -16,13 +16,21 @@ So I made my own. I present to you the **DPR Tactics Calculator**.
 
 ## Requirements
 
-### Excel (backwards compatible)
+### Excel (backward-compatible)
 
 Currently the spreadsheet has a limitation to only one die reading per cell.
 
 The planned spreadsheet can fix that but it uses some functions only available to Microsoft 365, however, the online free version should suffice.
 
 * Note: In the future, I plan to make a python version that takes CSV files as input.
+
+## Documentation
+
+I made note of all the formulas in easier to read format.
+
+- Excel (backward-compatible)
+    + [DPR Calculator spreadsheet formulas](./excel_backwards_compatible/documentation/DPR%20Calculator%20spreadsheet%20formulas.md)
+    + [Pivot Table spreadsheet formulas](./excel_backwards_compatible/documentation/Pivot%20Table%20spreadsheet%20formulas.md)
 
 ## Terminology
 
@@ -84,15 +92,11 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
     + Area type
     + Size
     + Expected Targets
-    
-|Area              |  Number of Targets      |
-|--------------------------------------------|
-|Cone              |  Size   / 10 (round up) |
-|Cube or square    |  Size   / 5  (round up) |
-|Cylinder          |  Radius / 5  (round up) |
-|Line              |  Length / 30 (round up) |
-|Sphere or circle  |  Radius / 5  (round up) |
-
+        * Cone            : Size   / 10 (round up)
+        * Cube or square  : Size   / 5  (round up)
+        * Cylinder        : Radius / 5  (round up)
+        * Line            : Length / 30 (round up)
+        * Sphere or circle: Radius / 5  (round up)
 - *Great Weapon Fighting Style* toggle: Since this ability lets you reroll some of the damage dice, I added the expected damage. (Note: it's (1-(2/DieSize)) per die)
 - Dice that you only roll on crits and get to multiply (like smites)
 - Dice that you only roll on crits but you don't multiply (like Savage Attacks)
@@ -124,12 +128,12 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
         * Rating 3: "★★☆  Target (expected)"
         * Rating 4: "★★★  High (heavy hitter)"
         * Rating 5: "🕱🕱🕱🕱  Over Powered (dude stop)"
+- Total DPR Rating: This is an experimental field. With AOE attacks, the more enemies the more powerful the spell is, but any spell with more than 3 targets ends up rating as Over Powered with the current math. I am not sure if this is a correct interpretation, or if I should modify the math to account for AOE...
 - Notes section: Just in case
-
 
 ## Future work
 
-I want to make an Office 365 version where added dice notation (e.g. 1d8+2d6) can be read in a single cell.
+I want to make an Office 365 version where added dice notation (e.g. 1d8+2d6) can be read in a single cell, and therefore all the extra cells can become redundant.
 
 ## References
 
@@ -137,3 +141,5 @@ I want to make an Office 365 version where added dice notation (e.g. 1d8+2d6) ca
 - [DnD 5e – DPR Calculator | RPGBOT](https://rpgbot.net/dnd5/tools/dpr-calculator/): I actually got my inspiration for this project by using this calculator and realizing I had bigger plans than I could type in my cellphone.
 - [DnD 5e – The Fundamental Math of Character Optimization | RPGBOT](https://rpgbot.net/dnd5/characters/fundamental_math/): Helped me establish the DPR rating calculations.
 - [Comprehensive DPR Calculator | LudicSavant](https://forums.giantitp.com/showthread.php?582779-Comprehensive-DPR-Calculator-(v2-0)) and it's [documentation](https://docs.google.com/document/u/1/d/11eTMZPPxWXHY0rQEhK1msO-40BcCGrzArSl4GX4CiJE/edit?pli=1) helped me figure out the formulas for Halfling luck and for Elven Accuracy. It also made me realize I need to add Great Weapon Master feat to the calculations as an option.
+- Dungeon Master's Guide for AOE expected values and expected enemy HP
+- [This guide with all ways to increase to hit bonus | u/wateryoshi on Reddit](https://www.reddit.com/r/dndnext/comments/km4i7x/heres_every_way_to_increase_your_to_hit_attack/)
