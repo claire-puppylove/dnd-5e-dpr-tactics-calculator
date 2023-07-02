@@ -14,6 +14,16 @@ Oh! not to mention, lots of DPR calculators assume that you're not casting spell
 
 So I made my own. I present to you the **DPR Tactics Calculator**.
 
+## Requirements
+
+### Excel (backwards compatible)
+
+Currently the spreadsheet has a limitation to only one die reading per cell.
+
+The planned spreadsheet can fix that but it uses some functions only available to Microsoft 365, however, the online free version should suffice.
+
+* Note: In the future, I plan to make a python version that takes CSV files as input.
+
 ## Terminology
 
 ### Tactics
@@ -31,83 +41,95 @@ Therefore you got:
 
 Since I was inspired by RPGBOT, most of the initial functions are the same, but I added some more.
 
-- Main DPR Tactics Calculator worksheet
-    + Row ID: Important for some other functions
-    + Tactic ID: It keeps the tactic intact and grouped together when doing calculations, and it's better if it's descriptive for the pivot table later on.
-    + Repeat Attacks: Use when you have several attacks per action with the exact same settings
-    + Great Weapon Master -5 to hit for +10 dmg: You can toggle this and not worry about writing those specifics, they get added automatically to their respective columns.
-    + Assumed relative modifiers to hit: When you level up and the enemy levels up, how much are your chances actually increasing? This field updates automatically as you set your character's level. Additionally, it gets a -5 automatically if you use the GWM toggle described above.
-    + Optional relative modifiers to hit: For adding that +1 magic sword, or perhaps for characters with very good stats for their level. This has to be something that's added from different sources than the automatic modifiers calculated above.
-    + Min to Hit: After all is said and done, how much you have to roll on your 1d20 to hit the target at this level.
-    + Min to Crit: Some abilities like the Champion Fighter Improved Critical, or the Hexblade Warlock Hexblade's Curse let you crit on lower than 20.
-    + Accuracy types: We got formulas for days
-        * Standard
-        * Advantage
-        * Disadvantage
-        * Elven Accuracy
-        * Saving throw spells
-        * Saving throw spells with half damage on miss
-        * Saving throw spells when the enemy is disadvantaged
-        * Saving throw spells with enemy disadvantage that do half damage on miss
-        * Saving throw spells, but the enemy has legendary resistances
-        * Saving throw spells with half damage on miss, considering legendary resistances
-        * Saving throw spells when the enemy is disadvantaged, considering legendary resistances
-        * Saving throw spells with enemy disadvantage that do half damage on miss, considering legendary resistances
-    + Halfling Luck (Except Elven Accuracy and spells with saving throws)
-        * *Halflings can't have Elven Accuracy, but if you select the option it just gives you the formula for halfling advantage*
-        * *Halfling luck lets you reroll your d20s, but not your opponents.*
-    + Current Attack is GWM Crit Bonus Attack: Great Weapon Master allows you to make an attack with a heavy weapon you're proficient with as a Bonus Action if you score a critical hit on your previous attack (or if you make an enemy reach 0 HP but we don't have a way to track that, just don't mark this as YES if you want to see how that is calculated).
-        * The new probabilities get stacked with the previous crit percentage. (crit_n = crit_n-1\*crit; hit_n = crit_n-1\*hit...)
-    + Display of probabilities:
-        * Critical Hit % chance
-        * Hit % chance (including crits)
-        * Hit % chance (NOT including crits)
-        * Miss % chance
-    + **Legendary resistances counter**: Starting at 3 but manually modifiable, if your tactics depend on getting those resistances down, this calculator lets you check which way to spend those spell slots is better
-    + *Great Weapon Fighting Style* toggle: Since this ability lets you reroll some of the damage dice, I added the expected damage. (Note: it's (1-(2/DieSize)) per die)
-    + *Elemental Adept Feat* options: If the damage type matches, all your ones turn into twos. You get an extra 1/DieSize average damage per die.
-    + Dice that you only roll on crits and get to multiply (like smites)
-    + Dice that you only roll on crits but you don't multiply (like Savage Attacks)
-    + Dice that can't be multiplied even if you crit (like Booming Blade)
-    + Bonus flat damage: Put your damage modifiers here, except for the GWM+10
-    + Great Weapon Master Bonus Dmg: This becomes +10 automatically and added to the calculations if you activated the feature earlier.
+- Row ID: Important for some other functions
+- Tactic ID: It keeps the tactic intact and grouped together when doing calculations, and it's better if it's descriptive for the summary table later on.
+- Character ID: It can be used as a filter in the summary table.
+- Player or Enemy: It influences the assumed relative modifiers.
+- LV or CR: It influences the DPR rating at that level, and some relative modifiers.
+- Round: Keep track of which rounds do more damage.
+- Repeat Attacks: Use when you have several attacks per action with the exact same settings.
+- Halfling Luck (Except Elven Accuracy and spells with saving throws)
+    + *Halflings can't have Elven Accuracy, but if you select the option it just gives you the formula for halfling advantage*
+    + *Halfling luck lets you reroll your d20s, but not your opponents.*
+- Lucky feat: adds another die to the calculations! It can also be used for the Fortune's Favor spell.
+- Current Attack is GWM Crit Bonus Attack: Great Weapon Master allows you to make an attack with a heavy weapon you're proficient with as a Bonus Action if you score a critical hit on your previous attack (or if you make an enemy reach 0 HP but we don't have a way to track that, just don't mark this as YES if you want to see how that is calculated).
+    + The new probabilities get stacked with the previous crit percentage. (crit_n = crit_n-1\*crit; hit_n = crit_n-1\*hit...)
+- Great Weapon Master -5 to hit for +10 dmg: You can toggle this and not worry about writing those specifics, they get added automatically to their respective columns.
+- War Cleric Channel Divinity +10 to hit toggle
+- Dice added to attack rolls: Useful for Bless or Bardic Inspiration.
+- Assumed relative modifiers to hit: When you level up and the enemy levels up, how much are your chances actually increasing? This field updates automatically as you set your character's level. Additionally, it gets a -5 automatically if you use the GWM toggle described above, or +10 if the War Cleric toggle is active, and also it adds the dice added to the attack rolls by Bless or Bardic inspiration, but only if it's an attack roll (not added on save throw spells).
+- Optional relative modifiers to hit: For adding that +1 magic sword, or perhaps for characters with very good stats for their level, or perhaps -1 for stats under the expectations. This has to be something that's added from different sources than the automatic modifiers calculated above.
+- Min to Hit: After all is said and done, this automatically reflects how much you have to roll on your 1d20 to hit the target at this level.
+- Min to Crit: Some abilities like the Champion Fighter Improved Critical, or the Hexblade Warlock Hexblade's Curse let you crit on lower than 20.
+- Accuracy types: We got formulas for days
+    + Standard
+    + Advantage
+    + Disadvantage
+    + Elven Accuracy
+    + Saving throw spells
+    + Saving throw spells with half damage on miss
+    + Saving throw spells when the enemy is disadvantaged
+    + Saving throw spells with enemy disadvantage that do half damage on miss
+    + Saving throw spells, but the enemy has legendary resistances
+    + Saving throw spells with half damage on miss, considering legendary resistances
+    + Saving throw spells when the enemy is disadvantaged, considering legendary resistances
+    + Saving throw spells with enemy disadvantage that do half damage on miss, considering legendary resistances
+- **Legendary resistances counter**: Starting at 3 but manually modifiable, if your tactics depend on getting those resistances down, this calculator lets you check which way to spend those spell slots is better
+- Display of probabilities:
+    + Critical Hit % chance
+    + Hit % chance (including crits)
+    + Hit % chance (NOT including crits)
+    + Miss % chance
+- Area of Effect: Based on the DMG 'Adjudicating Areas of Effect' 249
+    + Area type
+    + Size
+    + Expected Targets
+    
+|Area              |  Number of Targets      |
+|--------------------------------------------|
+|Cone              |  Size   / 10 (round up) |
+|Cube or square    |  Size   / 5  (round up) |
+|Cylinder          |  Radius / 5  (round up) |
+|Line              |  Length / 30 (round up) |
+|Sphere or circle  |  Radius / 5  (round up) |
+
+- *Great Weapon Fighting Style* toggle: Since this ability lets you reroll some of the damage dice, I added the expected damage. (Note: it's (1-(2/DieSize)) per die)
+- Dice that you only roll on crits and get to multiply (like smites)
+- Dice that you only roll on crits but you don't multiply (like Savage Attacks)
+- Dice that can't be multiplied even if you crit (like Booming Blade)
+- Bonus flat damage: Put your damage modifiers here, except for the GWM+10 that gets auto-added on the next column
+- Great Weapon Master Bonus Dmg: This becomes +10 automatically and added to the calculations if you activated the feature earlier.
+- *Elemental Adept Feat* options: If the damage type matches, all your ones turn into twos. You get an extra 1/DieSize average damage per die.
     + Damage types for all your dice (for the elemental adept feat, or your own satisfaction)
-    + Average Damage Added on Crit: so you can know exactly how much a crit helps you
-    + Average Dice Damage on Hit
-    + Average Resulting Crit Dice Damage: check it so you can have hopes and dreams
-    + Average Damage on Miss: useful for those half damage spells
-        * **Save throw spells miss damage**: This function I didn't see in many other places. My calculator outputs the average damage on a miss and multiplies it by the probability of a miss, and adds it to the damage calculations.
-    + Average Attack Damage: The expected damage for the row details
-    + Average Round Damage: The total expected damage for all the rows of the same round and tactic identifiers
-    + Average Tactic Damage: The total expected damage for all the rounds it took to perform a tactic
-    + Damage per Round: The average damage per round when dividing the tactic damage by the number of rounds
-    + DPR Rating: Thanks to RPGBOT's [DnD 5e – The Fundamental Math of Character Optimization](https://rpgbot.net/dnd5/characters/fundamental_math/), I got some data as to how to make an automatic rating calculation. You get the DPR and check the level, and trusting the words of this article, you can know how well you stand instantly in my calculator. An additional "No damage" rating helps to not get a bad rating if you are actually casting debuffs and other useful non-damaging spells, or perhaps using the Help action, or even Healing yourself or others. You could technically input other player's actions in the tactic as well to up the rating if you would prefer to think about it that way.
-        * Rating =0: "☆☆☆  No damage"
-        * Rating <2: "🡇🡇🡇  Not helping (lowest)"
-        * Rating <3: "★☆☆  Low (support, control, debuff)"
-        * Rating <4: "★★☆  Target (expected)"
-        * Rating <5: "★★★  High (heavy hitter)"
-        * Rating =5: "🕱🕱🕱🕱  Over Powered (dude stop)"
-    + Notes section: Just in case
-- Pivot table: DPR Summary
-    + Rows:
-        * Level or CR: Helps with grouping as you level up, but you can remove it if you'd prefer
-        * Tactic ID: Paramount for the rating
-        * Round: Optional, but helpful
-    - Values:
-        * Attack damage
-        * Round damage
-        * Tactic damage
-        * DPR
-        * Rating
-    - External calculations:
-        + Rating description: This one you have to drag and expand to fit your pivot table, but it's nice to have for reference.
+- Average Damage Added on Crit: so you can know exactly how much a crit helps you
+- Average Dice Damage on Hit
+- Average Resulting Crit Dice Damage: check it so you can have hopes and dreams
+- Average Damage on Miss: useful for those half damage spells
+    + **Save throw spells miss damage**: This function I didn't see in many other places. My calculator outputs the average damage on a miss and multiplies it by the probability of a miss, and adds it to the damage calculations.
+- Damage per Attack: confirm before counting repetitions or multiple AOE targets.
+- Average Resulting Damage per Target: after attack repetitions.
+- Average Resulting Damage Total: after counting in multiple targets.
+- Average Round Damage per Target: The expected damage per target for all the rows of the same round and tactic identifiers
+- Average Round Damage Total: The total expected damage for the round
+- Average Tactic Damage per Target: The expected damage per target for all the rounds it took to perform a tactic
+- Average Tactic Damage Total: The total expected damage for the tactic
+- Damage per Round per Target: The average damage per round per target when dividing the tactic damage per target by the number of rounds
+- Total Damage per Round: The resulting DPR including all targets.
+- DPR per Target Rating: Thanks to RPGBOT's [DnD 5e – The Fundamental Math of Character Optimization](https://rpgbot.net/dnd5/characters/fundamental_math/), I got some data as to how to make an automatic rating calculation. You get the DPR and check the level, and trusting the words of this article, you can know how well you stand instantly in my calculator. An additional "No damage" rating helps to not get a bad rating if you are actually casting debuffs and other useful non-damaging spells, or perhaps using the Help action, or even Healing yourself or others. You could technically input other player's actions in the tactic as well to up the rating if you would prefer to think about it that way.
+    + Formula: Considering the Max Enemy HP at that CR, 3 rounds for OP, 6 rounds for high, 12 rounds for target, 24 rounds for low, and anything higher is not helping.
+    + Ratings:
+        * Rating 0: "☆☆☆  No damage"
+        * Rating 1: "🡇🡇🡇  Not helping (lowest)"
+        * Rating 2: "★☆☆  Low (support, control, debuff)" 
+        * Rating 3: "★★☆  Target (expected)"
+        * Rating 4: "★★★  High (heavy hitter)"
+        * Rating 5: "🕱🕱🕱🕱  Over Powered (dude stop)"
+- Notes section: Just in case
 
 
 ## Future work
 
-I want to add a new row button and buttons to hide the clutter columns.
-Average Round Damage is still not structured reference.
+I want to make an Office 365 version where added dice notation (e.g. 1d8+2d6) can be read in a single cell.
 
 ## References
 
