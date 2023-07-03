@@ -9,8 +9,12 @@
     - [Dice rolls](#dice-rolls)
 - [Dice notation reading](#dice-notation-reading)
     - [Splitting the dice notation \(e.g. 1d8\)](#splitting-the-dice-notation-eg-1d8)
+        - [left of d](#left-of-d)
+        - [right of d](#right-of-d)
+        - [Splitting by + sign](#splitting-by--sign)
     - [Single dice notation \(e.g. 1d8\)](#single-dice-notation-eg-1d8)
-    - [Splitting by + sign](#splitting-by--sign)
+    - [Turn 1s into 2s for Elemental Adept](#turn-1s-into-2s-for-elemental-adept)
+    - [Reroll 1s and 2s for Great Weapon Fighting Style](#reroll-1s-and-2s-for-great-weapon-fighting-style)
 - [Modifiers](#modifiers)
     - [Halfling](#halfling)
     - [Lucky feat or Fortune's Blessing](#lucky-feat-or-fortunes-blessing)
@@ -128,95 +132,158 @@ If so, add columns between AL and AM.
 <a id="splitting-the-dice-notation-eg-1d8"></a>
 ### Splitting the dice notation (e.g. 1d8)
 
-left of d
+<a id="left-of-d"></a>
+#### left of d
 ```
-=N("Number of Dice")+
-(
-    N("Left of cell from position x in the string")+
-    LEFT(
-        [Damage Dice],
-        (N("Position first d found -1 to delete d")+
-        (SEARCH("d",[Damage Dice])-1))
-    )
+=(
+    N("Number of Dice")+
+    N("Left of cell from position of 'd' in the string")+
+    IF(COUNT(SEARCH("d",dice))>0,
+        LEFT(dice,(SEARCH("d",dice)-1)),
+        (N("0 if no dice found.")+0))
 )
 ```
 
-right of d
+and without condition:
 ```
-=N("Die size")+
-(
-    N("Right of cell from position x in the string.")+
-    RIGHT(
-        [Damage Dice],
-        (
-            (N("Length of string to subtract position of d")+
-            LEN([Damage Dice]))
-            -
-            (N("Search first found d")+
-            (SEARCH("d",[Damage Dice])))
-        )
-    )
+=(
+    N("Number of Dice")+
+    N("Left of cell from position of 'd' in the string")+
+    LEFT(dice,(SEARCH("d",dice)-1))
 )
 ```
+
+
+<a id="right-of-d"></a>
+#### right of d
+
+```
+=(
+    N("Die size")+
+    N("Right of cell from position x in the string.")+
+    IF(COUNT(SEARCH("d",dice))>0,
+        RIGHT(dice,(LEN(dice)-SEARCH("d",dice))),
+        (N("0 if no dice found.")+0))
+)
+```
+
+and without condition:
+```
+=(
+    N("Die size")+
+    N("Right of cell from position x in the string.")+
+    RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
+)
+```
+
+<a id="splitting-by--sign"></a>
+#### Splitting by + sign
+
+To be implemented in the Office 365 version and the python version.
+
+I plan to use the `TEXTSPLIT()` and `MAP()` and `LAMBDA()` functions to define a `DICEAVERAGE()` and `DICESUMAVERAGE()` functions
 
 <a id="single-dice-notation-eg-1d8"></a>
 ### Single dice notation (e.g. 1d8)
 
 ```
-=N("Average dice damage")+
-IF(
-    (N("Condition: has to have dice notation")+
-    COUNT(SEARCH("d",[Dice notation]))>0),
-    (
-        N("Base damage of the dice")+
-        (
-            (
-                N("Number of Dice")+
-                (
-                    N("Left of cell from position x in the string")+
-                    LEFT(
-                        [Dice notation],
-                        (N("Position first d found -1 to delete d")+
-                        (SEARCH("d",[Dice notation])-1))
-                    )
-                )
-            )
-            *
-            (
-                N("Average roll for the die size")+
-                AVERAGE(
-                    N("Lowest roll possible")+
-                    1,
-                    (
-                        N("Die size")+
-                        (
-                            N("Right of cell from position x in the string.")+
-                            RIGHT(
-                                [Dice notation],
-                                (
-                                    (N("Length of string to subtract position of d")+
-                                    LEN([Dice notation]))
-                                    -
-                                    (N("Search first found d")+
-                                    (SEARCH("d",[Dice notation])))
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+=(
+    N("Average dice roll")+
+    IF(COUNT(SEARCH("d",dice))>0,
+        ((
+            N("Number of Dice")+
+            N("Left of cell from position of 'd' in the string")+
+            LEFT(dice,(SEARCH("d",dice)-1))
         )
-    ),
-    (N("0 if no dice found.")+0)
+        *
+        (
+            N("Average roll for the die size")+
+            AVERAGE(
+                N("Lowest roll possible")+
+                1,
+                N("Die size")+
+                N("Right of cell from position x in the string.")+
+                RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
+            ))
+        ),
+        N(dice)
+    )
 )
 ```
 
-<a id="splitting-by--sign"></a>
-### Splitting by + sign
 
-To be implemented in the Office 365 version and the python version.
+and without condition:
+```
+=((
+    N("Number of Dice")+
+    N("Left of cell from position of 'd' in the string")+
+    LEFT(dice,(SEARCH("d",dice)-1))
+)
+*
+(
+    N("Average roll for the die size")+
+    AVERAGE(
+        N("Lowest roll possible")+
+        1,
+        N("Die size")+
+        N("Right of cell from position x in the string.")+
+        RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
+    ))
+)
+```
 
-I plan to use the `TEXTSPLIT()` and `LAMBDA()` functions to define a `DICEAVERAGE()` and `DICESUMAVERAGE()` functions
+
+
+<a id="turn-1s-into-2s-for-elemental-adept"></a>
+### Turn 1s into 2s for Elemental Adept
+
+Without condition since we will use it mid-formula anyways.
+
+```
+
+=N("Add 1/DieSize per die")+
+((
+    N("Number of Dice")+
+    N("Left of cell from position of 'd' in the string")+
+    LEFT(dice,(SEARCH("d",dice)-1))
+)
+*
+(
+    1
+    /
+    (
+        N("Die size")+
+        N("Right of cell from position x in the string.")+
+        RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
+    ))
+)
+```
+
+<a id="reroll-1s-and-2s-for-great-weapon-fighting-style"></a>
+### Reroll 1s and 2s for Great Weapon Fighting Style
+
+```
+=N("Reroll 1s and 2s")+
+((
+    N("Number of Dice")+
+    N("Left of cell from position of 'd' in the string")+
+    LEFT(dice,(SEARCH("d",dice)-1))
+)
+*
+(
+    1
+    -
+    (
+        2
+        /
+        (
+            N("Die size")+
+            N("Right of cell from position x in the string.")+
+            RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
+        )))
+)
+```
+
 
 <a id="modifiers"></a>
 ## Modifiers
@@ -280,99 +347,53 @@ Sadly, for the moment I only know how to add one of them at a time, so I have se
 
 ```
 [Dice to attack roll average result]
-=IF(
-    (N("Condition: has to have dice notation")+
-    COUNT(SEARCH("d",[Dice added to attack roll]))>0),
-    (
-        N("Base damage of the dice")+
-        (
-            (
-                N("Number of Dice")+
-                (
-                    N("Left of cell from position x in the string")+
-                    LEFT(
-                        [Dice added to attack roll],
-                        (N("Position first d found -1 to delete d")+
-                        (SEARCH("d",[Dice added to attack roll])-1))
-                    )
-                )
-            )
-            *
-            (
-                N("Average roll for the die size")+
-                AVERAGE(
-                    N("Lowest roll possible")+
-                    1,
-                    (
-                        N("Die size")+
-                        (
-                            N("Right of cell from position x in the string.")+
-                            RIGHT(
-                                [Dice added to attack roll],
-                                (
-                                    (N("Length of string to subtract position of d")+
-                                    LEN([Dice added to attack roll]))
-                                    -
-                                    (N("Search first found d")+
-                                    (SEARCH("d",[Dice added to attack roll])))
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+=(
+    N("Average dice roll")+
+    IF(COUNT(SEARCH("d",[@[Dice added to attack roll]]))>0,
+        ((
+            N("Number of Dice")+
+            N("Left of cell from position of 'd' in the string")+
+            LEFT([@[Dice added to attack roll]],(SEARCH("d",[@[Dice added to attack roll]])-1))
         )
-    ),
-    (N("0 if no dice found.")+0)
+        *
+        (
+            N("Average roll for the die size")+
+            AVERAGE(
+                N("Lowest roll possible")+
+                1,
+                N("Die size")+
+                N("Right of cell from position x in the string.")+
+                RIGHT([@[Dice added to attack roll]],(LEN([@[Dice added to attack roll]])-SEARCH("d",[@[Dice added to attack roll]])))
+            ))
+        ),
+        N([@[Dice added to attack roll]])
+    )
 )
 ```
 
 ```
 [More dice to attack roll average result]
-=IF(
-    (N("Condition: has to have dice notation")+
-    COUNT(SEARCH("d",[More dice added to attack roll]))>0),
-    (
-        N("Base damage of the dice")+
-        (
-            (
-                N("Number of Dice")+
-                (
-                    N("Left of cell from position x in the string")+
-                    LEFT(
-                        [More dice added to attack roll],
-                        (N("Position first d found -1 to delete d")+
-                        (SEARCH("d",[More dice added to attack roll])-1))
-                    )
-                )
-            )
-            *
-            (
-                N("Average roll for the die size")+
-                AVERAGE(
-                    N("Lowest roll possible")+
-                    1,
-                    (
-                        N("Die size")+
-                        (
-                            N("Right of cell from position x in the string.")+
-                            RIGHT(
-                                [More dice added to attack roll],
-                                (
-                                    (N("Length of string to subtract position of d")+
-                                    LEN([More dice added to attack roll]))
-                                    -
-                                    (N("Search first found d")+
-                                    (SEARCH("d",[More dice added to attack roll])))
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+=(
+    N("Average dice roll")+
+    IF(COUNT(SEARCH("d",[@[More dice added to attack roll]]))>0,
+        ((
+            N("Number of Dice")+
+            N("Left of cell from position of 'd' in the string")+
+            LEFT([@[More dice added to attack roll]],(SEARCH("d",[@[More dice added to attack roll]])-1))
         )
-    ),
-    (N("0 if no dice found.")+0)
+        *
+        (
+            N("Average roll for the die size")+
+            AVERAGE(
+                N("Lowest roll possible")+
+                1,
+                N("Die size")+
+                N("Right of cell from position x in the string.")+
+                RIGHT([@[More dice added to attack roll]],(LEN([@[More dice added to attack roll]])-SEARCH("d",[@[More dice added to attack roll]])))
+            ))
+        ),
+        N([@[More dice added to attack roll]])
+    )
 )
 ```
 
@@ -403,10 +424,10 @@ I put a counter for legendary resistances.
 [Legendary Resistances Left]
 =IF(
     OR(
-        [Accuracy]="SP DC LEGEND RESIST",
-        [Accuracy]="SP DC M 1/2 LEG RESIST",
-        [Accuracy]="SP DC EN DVG LEG RES",
-        [Accuracy]="SP DC M 1/2 EN DVG L-RES"
+        [@Accuracy]="SP DC LEGEND RESIST",
+        [@Accuracy]="SP DC M 1/2 LEG RESIST",
+        [@Accuracy]="SP DC EN DVG LEG RES",
+        [@Accuracy]="SP DC M 1/2 EN DVG L-RES"
     ),
     (
         N("if leg res is used, check if previous others were cast for this tactic")+
@@ -474,7 +495,7 @@ Now, there's two modifiers that are dependent on attack rolls only (no saving th
 ```
 [Assumed Relative Modifier to Hit]
 =IFS(
-    AND([Player or Enemy]="PC",[LV or CR]=9),
+    AND([@[Player or Enemy]]="PC",[@[LV or CR]]=9),
     1,
     1,
     0
@@ -482,25 +503,25 @@ Now, there's two modifiers that are dependent on attack rolls only (no saving th
 +
 IF(
     OR(
-        [Accuracy]="STANDARD",
-        [Accuracy]="DISADVANTAGE",
-        [Accuracy]="ADVANTAGE",
-        [Accuracy]="ELVEN ACCURACY",
+        [@Accuracy]="STANDARD",
+        [@Accuracy]="DISADVANTAGE",
+        [@Accuracy]="ADVANTAGE",
+        [@Accuracy]="ELVEN ACCURACY",
     ),
     (
         IF(
-            [Great Weapon Master -5 to hit for +10 dmg]="YES",
+            [@[Great Weapon Master -5 to hit for +10 dmg]]="YES",
             (-5),
             0
         )
         +
         IF(
-            [War Cleric Channel Divinity +10 to hit]="YES",
+            [@[War Cleric Channel Divinity +10 to hit]]="YES",
             10,
             0
         )
         +
-        SUM([Dice to attack roll average result]:[More dice to attack roll average result])
+        SUM([@[Dice to attack roll average result]]:[@[More dice to attack roll average result]])
     ),
     0
 )
@@ -531,11 +552,11 @@ If you are not using your main stat (say you make a ranged attack but your DEX i
 (
     8
     -
-    [Assumed Relative Modifier to Hit]
+    [@[Assumed Relative Modifier to Hit]]
     -
     IF(
-        ISNUMBER([Add Relative Modifier to Hit]),
-        [Add Relative Modifier to Hit],
+        ISNUMBER([@[Add Relative Modifier to Hit]]),
+        [@[Add Relative Modifier to Hit]],
         0
     )
 )
@@ -590,150 +611,154 @@ Cell formula:
 
 ```
 [[Crit % Chance]]
-=IFS(
-    AND(
-        [Accuracy]="STANDARD",
-        [Lucky feat]="NO",
-        [Halfling]="NO"
-    ),
-        N("Standard crit formula")+
-        (1-(([Min to Crit]-1)/20)),
-    AND(
-        [Accuracy]="DISADVANTAGE",
-        [Lucky feat]="NO",
-        [Halfling]="NO"
-    ),
-        N("Disadvantage crit formula")+
-        ((1-([Min to Crit]-1)/20)^2),
-    OR(
+=IF(
+    [@[Enemy Paralyzed close-range auto-crit on hit]]="YES",
+    [@[Hit % Chance]],
+    IFS(
         AND(
-            [Accuracy]="ADVANTAGE",
-            [Lucky feat]="NO",
-            [Halfling]="NO"
+            [@Accuracy]="STANDARD",
+            [@[Lucky feat]]="NO",
+            [@Halfling]="NO"
         ),
+            N("Standard crit formula")+
+            (1-(([@[Min to Crit]]-1)/20)),
         AND(
-            [Accuracy]="STANDARD",
-            [Lucky feat]="YES",
-            [Halfling]="NO"
-        )
-    ),
-        N("Advantage crit formula")+
-        (1-(1-(1-(([Min to Crit]-1)/20)))^2),
-    OR(
-        AND(
-            [Accuracy]="ELVEN ACCURACY",
-            [Lucky feat]="NO",
-            [Halfling]="NO"
+            [@Accuracy]="DISADVANTAGE",
+            [@[Lucky feat]]="NO",
+            [@Halfling]="NO"
         ),
-        AND(
-            [Accuracy]="ADVANTAGE",
-            [Lucky feat]="YES",
-            [Halfling]="NO"
+            N("Disadvantage crit formula")+
+            ((1-([@[Min to Crit]]-1)/20)^2),
+        OR(
+            AND(
+                [@Accuracy]="ADVANTAGE",
+                [@[Lucky feat]]="NO",
+                [@Halfling]="NO"
+            ),
+            AND(
+                [@Accuracy]="STANDARD",
+                [@[Lucky feat]]="YES",
+                [@Halfling]="NO"
+            )
         ),
-        AND(
-            [Accuracy]="DISADVANTAGE",
-            [Lucky feat]="YES",
-            [Halfling]="NO"
-        )
-    ),
-        N("Elven accuracy crit formula (3 dice)")+
-        (1-(1-(1-(([Min to Crit]-1)/20)))^3),
-    AND(
-        [Accuracy]="ELVEN ACCURACY",
-        [Lucky feat]="YES",
-        [Halfling]="NO"
-    ),
-        N("Elven accuracy crit formula with Lucky feat (4 dice)")+
-        (1-(1-(1-(([Min to Crit]-1)/20)))^4),
-    AND(
-        [Accuracy]="STANDARD",
-        [Lucky feat]="NO",
-        [Halfling]="YES"
-    ),
-        N("Halfling standard crit formula")+
-        ((1-(([Min to Crit]-1)/20))
-        +
-        ((1-(([Min to Crit]-1)/20))/20)),
-    AND(
-        [Accuracy]="DISADVANTAGE",
-        [Lucky feat]="NO",
-        [Halfling]="YES"
-    ),
-        N("Halfling disadvantage crit formula")+
-        (((1-(([Min to Crit]-1)/20))^2)
-        +
-        ((2/20)
-        *
-        ((1-(([Min to Crit]-1)/20))^2))),
-    OR(
-        AND(
-            [Accuracy]="ADVANTAGE",
-            [Lucky feat]="NO",
-            [Halfling]="YES"
+            N("Advantage crit formula")+
+            (1-(1-(1-(([@[Min to Crit]]-1)/20)))^2),
+        OR(
+            AND(
+                [@Accuracy]="ELVEN ACCURACY",
+                [@[Lucky feat]]="NO",
+                [@Halfling]="NO"
+            ),
+            AND(
+                [@Accuracy]="ADVANTAGE",
+                [@[Lucky feat]]="YES",
+                [@Halfling]="NO"
+            ),
+            AND(
+                [@Accuracy]="DISADVANTAGE",
+                [@[Lucky feat]]="YES",
+                [@Halfling]="NO"
+            )
         ),
+            N("Elven accuracy crit formula (3 dice)")+
+            (1-(1-(1-(([@[Min to Crit]]-1)/20)))^3),
         AND(
-            [Accuracy]="ELVEN ACCURACY",
-            [Lucky feat]="NO",
-            [Halfling]="YES"
+            [@Accuracy]="ELVEN ACCURACY",
+            [@[Lucky feat]]="YES",
+            [@Halfling]="NO"
         ),
+            N("Elven accuracy crit formula with Lucky feat (4 dice)")+
+            (1-(1-(1-(([@[Min to Crit]]-1)/20)))^4),
         AND(
-            [Accuracy]="STANDARD",
-            [Lucky feat]="YES",
-            [Halfling]="YES"
-        )
-    ),
-        N("Halfling advantage crit formula")+
-        N("No halfling can have Elven Accuracy")+
-        ((1-(1-(1-(([Min to Crit]-1)/20)))^2)
-        +
-        ((2*((1-(1-(([Min to Crit]-1)/20)))/20))-(1/(20^2)))
-        *
-        (1-(([Min to Crit]-1)/20))),
-    OR(
-        AND(
-            [Accuracy]="ADVANTAGE",
-            [Lucky feat]="YES",
-            [Halfling]="YES"
+            [@Accuracy]="STANDARD",
+            [@[Lucky feat]]="NO",
+            [@Halfling]="YES"
         ),
+            N("Halfling standard crit formula")+
+            ((1-(([@[Min to Crit]]-1)/20))
+            +
+            ((1-(([@[Min to Crit]]-1)/20))/20)),
         AND(
-            [Accuracy]="ELVEN ACCURACY",
-            [Lucky feat]="YES",
-            [Halfling]="YES"
+            [@Accuracy]="DISADVANTAGE",
+            [@[Lucky feat]]="NO",
+            [@Halfling]="YES"
         ),
-        AND(
-            [Accuracy]="DISADVANTAGE",
-            [Lucky feat]="YES",
-            [Halfling]="YES"
-        )
-    ),
-        N("Halfling advantage with Lucky feat (3 dice) crit formula")+
-        N("No halfling can have Elven Accuracy")+
-        ((1-(1-(1-(([Min to Crit]-1)/20)))^3)
-        +
-        ((3*((1-(1-(([Min to Crit]-1)/20)))/20))-(1/(20^3)))
-        *
-        (1-(([Min to Crit]-1)/20))),
-    OR(
-        [Accuracy]="SPELL (SAVE DC)",
-        [Accuracy]="SP DC MISS 1/2 DMG",
-        [Accuracy]="SP DC ENEMY DVG",
-        [Accuracy]="SP DC M 1/2 ENEMY DVG",
-        [Accuracy]="SP DC LEGEND RESIST",
-        [Accuracy]="SP DC M 1/2 LEG RESIST",
-        [Accuracy]="SP DC EN DVG LEG RES",
-        [Accuracy]="SP DC M 1/2 EN DVG L-RES"
-    ),
-        N("No crits for save throw spells")+0
+            N("Halfling disadvantage crit formula")+
+            (((1-(([@[Min to Crit]]-1)/20))^2)
+            +
+            ((2/20)
+            *
+            ((1-(([@[Min to Crit]]-1)/20))^2))),
+        OR(
+            AND(
+                [@Accuracy]="ADVANTAGE",
+                [@[Lucky feat]]="NO",
+                [@Halfling]="YES"
+            ),
+            AND(
+                [@Accuracy]="ELVEN ACCURACY",
+                [@[Lucky feat]]="NO",
+                [@Halfling]="YES"
+            ),
+            AND(
+                [@Accuracy]="STANDARD",
+                [@[Lucky feat]]="YES",
+                [@Halfling]="YES"
+            )
+        ),
+            N("Halfling advantage crit formula")+
+            N("No halfling can have Elven Accuracy")+
+            ((1-(1-(1-(([@[Min to Crit]]-1)/20)))^2)
+            +
+            ((2*((1-(1-(([@[Min to Crit]]-1)/20)))/20))-(1/(20^2)))
+            *
+            (1-(([@[Min to Crit]]-1)/20))),
+        OR(
+            AND(
+                [@Accuracy]="ADVANTAGE",
+                [@[Lucky feat]]="YES",
+                [@Halfling]="YES"
+            ),
+            AND(
+                [@Accuracy]="ELVEN ACCURACY",
+                [@[Lucky feat]]="YES",
+                [@Halfling]="YES"
+            ),
+            AND(
+                [@Accuracy]="DISADVANTAGE",
+                [@[Lucky feat]]="YES",
+                [@Halfling]="YES"
+            )
+        ),
+            N("Halfling advantage with Lucky feat (3 dice) crit formula")+
+            N("No halfling can have Elven Accuracy")+
+            ((1-(1-(1-(([@[Min to Crit]]-1)/20)))^3)
+            +
+            ((3*((1-(1-(([@[Min to Crit]]-1)/20)))/20))-(1/(20^3)))
+            *
+            (1-(([@[Min to Crit]]-1)/20))),
+        OR(
+            [@Accuracy]="SPELL (SAVE DC)",
+            [@Accuracy]="SP DC MISS 1/2 DMG",
+            [@Accuracy]="SP DC ENEMY DVG",
+            [@Accuracy]="SP DC M 1/2 ENEMY DVG",
+            [@Accuracy]="SP DC LEGEND RESIST",
+            [@Accuracy]="SP DC M 1/2 LEG RESIST",
+            [@Accuracy]="SP DC EN DVG LEG RES",
+            [@Accuracy]="SP DC M 1/2 EN DVG L-RES"
+        ),
+            N("No crits for save throw spells")+0
+    )
 )
 *
 IF(
     AND(
         [Current Attack is GWM Crit Bonus Attack]="YES",
         OR(
-            [Accuracy]="STANDARD",
-            [Accuracy]="DISADVANTAGE",
-            [Accuracy]="ADVANTAGE",
-            [Accuracy]="ELVEN ACCURACY"
+            [@Accuracy]="STANDARD",
+            [@Accuracy]="DISADVANTAGE",
+            [@Accuracy]="ADVANTAGE",
+            [@Accuracy]="ELVEN ACCURACY"
         )
     ),
     N("If the current attack is a Great Weapon Master crit bonus attack")+
@@ -799,179 +824,173 @@ Cell formula:
 
 ```
 [[Hit % Chance]]
-=
-(
-    IFS(
-        OR(
-            AND(
-                [Accuracy]="STANDARD",
-                [Lucky feat]="NO",
-                [Halfling]="NO"
-            ),
-            [Accuracy]="SPELL (SAVE DC)",
-            [Accuracy]="SP DC MISS 1/2 DMG",
-            AND(
-                OR(
-                    [Accuracy]="SP DC LEGEND RESIST",
-                    [Accuracy]="SP DC M 1/2 LEG RESIST"
-                ),
-                [Legendary Resistances Left]=0
-            )
-        ),
-            N("Standard hit formula")+
-            N("Standard hit formula for spells")+
-            N("After Legendary Resistances run out, standard hit formula for spells")+
-            (1-(([Min to Hit]-1)/20)),
+=IFS(
+    OR(
         AND(
-            [Accuracy]="DISADVANTAGE",
-            [Lucky feat]="NO",
-            [Halfling]="NO"
+            [@Accuracy]="STANDARD",
+            [@[Lucky feat]]="NO",
+            [@Halfling]="NO"
         ),
-            N("Disadvantage hit formula")+
-            ((1-(([Min to Hit]-1)/20))^2),
-        OR(
-            AND(
-                [Accuracy]="ADVANTAGE",
-                [Lucky feat]="NO",
-                [Halfling]="NO"
-            ),
-            AND(
-                [Accuracy]="STANDARD",
-                [Lucky feat]="YES",
-                [Halfling]="NO"
-            ),
-            [Accuracy]="SP DC ENEMY DVG",
-            [Accuracy]="SP DC M 1/2 ENEMY DVG",
-            AND(
-                OR(
-                    [Accuracy]="SP DC EN DVG LEG RES",
-                    [Accuracy]="SP DC M 1/2 EN DVG L-RES"
-                ),
-                [Legendary Resistances Left]=0
-            )
-        ),
-            N("Advantage hit formula")+
-            N("Advantage hit formula for spells against enemy with disadvantage")+
-            N("After Legendary Resistances run out, same")+
-            (1-(1-(1-(([Min to Hit]-1)/20)))^2),
-        OR(
-            AND(
-                [Accuracy]="ELVEN ACCURACY",
-                [Lucky feat]="NO",
-                [Halfling]="NO"
-            ),
-            AND(
-                [Accuracy]="ADVANTAGE",
-                [Lucky feat]="YES",
-                [Halfling]="NO"
-            ),
-            AND(
-                [Accuracy]="DISADVANTAGE",
-                [Lucky feat]="YES",
-                [Halfling]="NO"
-            )
-        ),
-            N("Elven accuracy hit formula (3 dice)")+
-            (1-(1-(1-(([Min to Hit]-1)/20)))^3),
-        AND(
-            [Accuracy]="ELVEN ACCURACY",
-            [Lucky feat]="YES",
-            [Halfling]="NO"
-        ),
-            N("Elven accuracy hit formula with Lucky feat (4 dice)")+
-            (1-(1-(1-(([Min to Hit]-1)/20)))^4),
-        AND(
-            [Accuracy]="STANDARD",
-            [Lucky feat]="NO",
-            [Halfling]="YES"
-        ),
-            N("Halfling standard hit formula")+
-            ((1-(([Min to Hit]-1)/20))
-            +
-            ((1-(([Min to Hit]-1)/20))/20)),
-        AND(
-            [Accuracy]="DISADVANTAGE",
-            [Lucky feat]="NO",
-            [Halfling]="YES"
-        ),
-            N("Halfling disadvantage hit formula")+
-            (((1-(([Min to Hit]-1)/20))^2)
-            +
-            ((2/20)
-            *
-            ((1-(([Min to Hit]-1)/20))^2))),
-        OR(
-            AND(
-                [Accuracy]="ADVANTAGE",
-                [Lucky feat]="NO",
-                [Halfling]="YES"
-            ),
-            AND(
-                [Accuracy]="ELVEN ACCURACY",
-                [Lucky feat]="NO",
-                [Halfling]="YES"
-            ),
-            AND(
-                [Accuracy]="STANDARD",
-                [Lucky feat]="YES",
-                [Halfling]="YES"
-            )
-        ),
-            N("Halfling advantage hit formula")+
-            N("No halfling can have Elven Accuracy")+
-            ((1-(1-(1-(([Min to Hit]-1)/20)))^2)
-            +
-            ((2*((1-(1-(([Min to Hit]-1)/20)))/20))-(1/(20^2)))
-            *
-            (1-(([Min to Hit]-1)/20))),
-        OR(
-            AND(
-                [Accuracy]="ADVANTAGE",
-                [Lucky feat]="YES",
-                [Halfling]="YES"
-            ),
-            AND(
-                [Accuracy]="ELVEN ACCURACY",
-                [Lucky feat]="YES",
-                [Halfling]="YES"
-            ),
-            AND(
-                [Accuracy]="DISADVANTAGE",
-                [Lucky feat]="YES",
-                [Halfling]="YES"
-            )
-        ),
-            N("Halfling advantage with Lucky feat (3 dice) hit formula")+
-            N("No halfling can have Elven Accuracy")+
-            ((1-(1-(1-(([Min to Crit]-1)/20)))^3)
-            +
-            ((3*((1-(1-(([Min to Hit]-1)/20)))/20))-(1/(20^3)))
-            *
-            (1-(([Min to Hit]-1)/20))),
+        [@Accuracy]="SPELL (SAVE DC)",
+        [@Accuracy]="SP DC MISS 1/2 DMG",
         AND(
             OR(
-                [Accuracy]="SP DC LEGEND RESIST",
-                [Accuracy]="SP DC M 1/2 LEG RESIST",
-                [Accuracy]="SP DC EN DVG LEG RES",
-                [Accuracy]="SP DC M 1/2 EN DVG L-RES"
+                [@Accuracy]="SP DC LEGEND RESIST",
+                [@Accuracy]="SP DC M 1/2 LEG RESIST"
             ),
-            ([Legendary Resistances Left]>0)
+            [@[Legendary Resistances Left]]=0
+        )
+    ),
+        N("Standard hit formula")+
+        N("Standard hit formula for spells")+
+        N("After Legendary Resistances run out, standard hit formula for spells")+
+        (1-(([@[Min to Hit]]-1)/20)),
+    AND(
+        [@Accuracy]="DISADVANTAGE",
+        [@[Lucky feat]]="NO",
+        [@Halfling]="NO"
+    ),
+        N("Disadvantage hit formula")+
+        ((1-(([@[Min to Hit]]-1)/20))^2),
+    OR(
+        AND(
+            [@Accuracy]="ADVANTAGE",
+            [@[Lucky feat]]="NO",
+            [@Halfling]="NO"
         ),
-            N("Legendary Resistance is a guaranteed miss")+0
-    )
-    +
-    N("Dice added to attack roll")+
-    N("Such as 1d4 for Bless or 1d6 for Bardic Inspiration")+
+        AND(
+            [@Accuracy]="STANDARD",
+            [@[Lucky feat]]="YES",
+            [@Halfling]="NO"
+        ),
+        [@Accuracy]="SP DC ENEMY DVG",
+        [@Accuracy]="SP DC M 1/2 ENEMY DVG",
+        AND(
+            OR(
+                [@Accuracy]="SP DC EN DVG LEG RES",
+                [@Accuracy]="SP DC M 1/2 EN DVG L-RES"
+            ),
+            [@[Legendary Resistances Left]]=0
+        )
+    ),
+        N("Advantage hit formula")+
+        N("Advantage hit formula for spells against enemy with disadvantage")+
+        N("After Legendary Resistances run out, same")+
+        (1-(1-(1-(([@[Min to Hit]]-1)/20)))^2),
+    OR(
+        AND(
+            [@Accuracy]="ELVEN ACCURACY",
+            [@[Lucky feat]]="NO",
+            [@Halfling]="NO"
+        ),
+        AND(
+            [@Accuracy]="ADVANTAGE",
+            [@[Lucky feat]]="YES",
+            [@Halfling]="NO"
+        ),
+        AND(
+            [@Accuracy]="DISADVANTAGE",
+            [@[Lucky feat]]="YES",
+            [@Halfling]="NO"
+        )
+    ),
+        N("Elven accuracy hit formula (3 dice)")+
+        (1-(1-(1-(([@[Min to Hit]]-1)/20)))^3),
+    AND(
+        [@Accuracy]="ELVEN ACCURACY",
+        [@[Lucky feat]]="YES",
+        [@Halfling]="NO"
+    ),
+        N("Elven accuracy hit formula with Lucky feat (4 dice)")+
+        (1-(1-(1-(([@[Min to Hit]]-1)/20)))^4),
+    AND(
+        [@Accuracy]="STANDARD",
+        [@[Lucky feat]]="NO",
+        [@Halfling]="YES"
+    ),
+        N("Halfling standard hit formula")+
+        ((1-(([@[Min to Hit]]-1)/20))
+        +
+        ((1-(([@[Min to Hit]]-1)/20))/20)),
+    AND(
+        [@Accuracy]="DISADVANTAGE",
+        [@[Lucky feat]]="NO",
+        [@Halfling]="YES"
+    ),
+        N("Halfling disadvantage hit formula")+
+        (((1-(([@[Min to Hit]]-1)/20))^2)
+        +
+        ((2/20)
+        *
+        ((1-(([@[Min to Hit]]-1)/20))^2))),
+    OR(
+        AND(
+            [@Accuracy]="ADVANTAGE",
+            [@[Lucky feat]]="NO",
+            [@Halfling]="YES"
+        ),
+        AND(
+            [@Accuracy]="ELVEN ACCURACY",
+            [@[Lucky feat]]="NO",
+            [@Halfling]="YES"
+        ),
+        AND(
+            [@Accuracy]="STANDARD",
+            [@[Lucky feat]]="YES",
+            [@Halfling]="YES"
+        )
+    ),
+        N("Halfling advantage hit formula")+
+        N("No halfling can have Elven Accuracy")+
+        ((1-(1-(1-(([@[Min to Hit]]-1)/20)))^2)
+        +
+        ((2*((1-(1-(([@[Min to Hit]]-1)/20)))/20))-(1/(20^2)))
+        *
+        (1-(([@[Min to Hit]]-1)/20))),
+    OR(
+        AND(
+            [@Accuracy]="ADVANTAGE",
+            [@[Lucky feat]]="YES",
+            [@Halfling]="YES"
+        ),
+        AND(
+            [@Accuracy]="ELVEN ACCURACY",
+            [@[Lucky feat]]="YES",
+            [@Halfling]="YES"
+        ),
+        AND(
+            [@Accuracy]="DISADVANTAGE",
+            [@[Lucky feat]]="YES",
+            [@Halfling]="YES"
+        )
+    ),
+        N("Halfling advantage with Lucky feat (3 dice) hit formula")+
+        N("No halfling can have Elven Accuracy")+
+        ((1-(1-(1-(([Min to Crit]-1)/20)))^3)
+        +
+        ((3*((1-(1-(([@[Min to Hit]]-1)/20)))/20))-(1/(20^3)))
+        *
+        (1-(([@[Min to Hit]]-1)/20))),
+    AND(
+        OR(
+            [@Accuracy]="SP DC LEGEND RESIST",
+            [@Accuracy]="SP DC M 1/2 LEG RESIST",
+            [@Accuracy]="SP DC EN DVG LEG RES",
+            [@Accuracy]="SP DC M 1/2 EN DVG L-RES"
+        ),
+        ([@[Legendary Resistances Left]]>0)
+    ),
+        N("Legendary Resistance is a guaranteed miss")+0
 )
 *
 IF(
     AND(
         [Current Attack is GWM Crit Bonus Attack]="YES",
         OR(
-            [Accuracy]="STANDARD",
-            [Accuracy]="DISADVANTAGE",
-            [Accuracy]="ADVANTAGE",
-            [Accuracy]="ELVEN ACCURACY"
+            [@Accuracy]="STANDARD",
+            [@Accuracy]="DISADVANTAGE",
+            [@Accuracy]="ADVANTAGE",
+            [@Accuracy]="ELVEN ACCURACY"
         )
     ),
     N("If the current attack is a Great Weapon Master crit bonus attack")+
@@ -999,7 +1018,7 @@ Formula: `Hx=H-C`
 ```
 [@[Non-crit Hit % Chance]]
 =N("Hit percentage (not including crit)")+
-    ([[Hit % Chance]]-[[Crit % Chance]])
+    ([@[Hit % Chance]]-[@[Crit % Chance]])
 ```
 
 <a id="miss-chance"></a>
@@ -1008,7 +1027,7 @@ Formula: `Hx=H-C`
 Formula: M=1-H
 
 `[@[Miss % Chance]]
-=N("Miss percentage")+(1-[[Hit % Chance]])`
+=N("Miss percentage")+(1-[@[Hit % Chance]])`
 
 <a id="targets-and-repeated-attacks"></a>
 ## Targets and Repeated Attacks
@@ -1057,22 +1076,22 @@ I made the following formula.
 ```
 [Area of Effect Expected Targets]
 = IF(
-    ISNUMBER([[AOE size, length or radius]]),
+    ISNUMBER([@[AOE size, length or radius]]),
     N("Based on the Dungeon Master's Guide, page 249, 'Adjudicating Areas of Effect' table")+
     IFS(
-        [Area of Effect]="CONE",
+        [@[Area of Effect]]="CONE",
             N("Cone: Size   / 10 (round up)")+
-            ROUNDUP(([[AOE size, length or radius]]/10),0),
-        [Area of Effect]="CUBE",
+            ROUNDUP(([@[AOE size, length or radius]]/10),0),
+        [@[Area of Effect]]="CUBE",
             N("Cube or square: Size   / 5  (round up)")+
-            ROUNDUP(([[AOE size, length or radius]]/5),0),
-        [Area of Effect]="CYLINDER",
+            ROUNDUP(([@[AOE size, length or radius]]/5),0),
+        [@[Area of Effect]]="CYLINDER",
             N("Cylinder: Radius / 5  (round up)")+
-            ROUNDUP(([[AOE size, length or radius]]/5),0),
-        [Area of Effect]="LINE",
+            ROUNDUP(([@[AOE size, length or radius]]/5),0),
+        [@[Area of Effect]]="LINE",
             N("Line: Length / 30 (round up)")+
             ROUNDUP(([@[AOE size, length or radius]]/30),0),
-        [Area of Effect]="SPHERE",
+        [@[Area of Effect]]="SPHERE",
             N("Sphere or circle: Radius / 5  (round up)")+
             ROUNDUP(([@[AOE size, length or radius]]/5),0)
     ),
@@ -1101,132 +1120,71 @@ Formula:
 =N("Average damage")+
 IF(
     (N("Condition: has to have dice notation")+
-    COUNT(SEARCH("d",[Damage Dice]))>0),
+    COUNT(SEARCH("d",[@[Damage Dice]]))>0),
     (
         N("Base damage of the dice")+
+        ((
+            N("Number of Dice")+
+            N("Left of cell from position of 'd' in the string")+
+            LEFT([@[Damage Dice]],(SEARCH("d",[@[Damage Dice]])-1))
+        )
+        *
         (
-            (
-                N("Number of Dice")+
-                (
-                    N("Left of cell from position x in the string")+
-                    LEFT(
-                        [Damage Dice],
-                        (N("Position first d found -1 to delete d")+
-                        (SEARCH("d",[Damage Dice])-1))
-                    )
-                )
-            )
-            *
-            (
-                N("Average roll for the die size")+
-                AVERAGE(
-                    N("Lowest roll possible")+
-                    1,
-                    (
-                        N("Die size")+
-                        (
-                            N("Right of cell from position x in the string.")+
-                            RIGHT(
-                                [Damage Dice],
-                                (
-                                    (N("Length of string to subtract position of d")+
-                                    LEN([Damage Dice]))
-                                    -
-                                    (N("Search first found d")+
-                                    (SEARCH("d",[Damage Dice])))
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+            N("Average roll for the die size")+
+            AVERAGE(
+                N("Lowest roll possible")+
+                1,
+                N("Die size")+
+                N("Right of cell from position x in the string.")+
+                RIGHT([@[Damage Dice]],(LEN([@[Damage Dice]])-SEARCH("d",[@[Damage Dice]])))
+            ))
         )
         +
         N("Elemental Adept turn 1s into 2s.")+
         N("Average increases by 1/DieSize per die")+
         N("Condition: damage type matches EA type.")+
         IF(
-            ([Damage Type]=[[Feat: Elemental Adept Element]]),
+            ([@[Damage Type]]=[@[Feat: Elemental Adept Element]]),
+            N("Add 1/DieSize per die")+
+            ((
+                N("Number of Dice")+
+                N("Left of cell from position of 'd' in the string")+
+                LEFT([@[Damage Dice]],(SEARCH("d",[@[Damage Dice]])-1))
+            )
+            *
             (
+                1
+                /
                 (
-                    N("Number of Dice")+
-                    (
-                        N("Left of cell from position x in the string")+
-                        LEFT(
-                            [Damage Dice],
-                            (N("Position first d found -1 to delete d")+
-                            (SEARCH("d",[Damage Dice])-1))
-                        )
-                    )
-                )
-                *
-                (
-                    1
-                    /
-                    (
-                        N("Die size")+
-                        (
-                            N("Right of cell from position x in the string.")+
-                            RIGHT(
-                                [Damage Dice],
-                                (
-                                    (N("Length of string to subtract position of d")+
-                                    LEN([Damage Dice]))
-                                    -
-                                    (N("Search first found d")+
-                                    (SEARCH("d",[Damage Dice])))
-                                )
-                            )
-                        )
-                    )
-                )
+                    N("Die size")+
+                    N("Right of cell from position x in the string.")+
+                    RIGHT([@[Damage Dice]],(LEN([@[Damage Dice]])-SEARCH("d",[@[Damage Dice]])))
+                ))
             ),
             (N("0 if no Elemental Adept applies.")+0)
         )
         +
         N("Great Weapon Fighting style reroll 1s and 2s once.")+
         IF(
-            ([Great Weapon Fighting Style]="YES"),
+            ([@[Great Weapon Fighting Style]]="YES"),
+            N("Reroll 1s and 2s")+
+            ((
+                N("Number of Dice")+
+                N("Left of cell from position of 'd' in the string")+
+                LEFT([@[Damage Dice]],(SEARCH("d",[@[Damage Dice]])-1))
+            )
+            *
             (
+                1
+                -
                 (
-                    N("Number of Dice")+
+                    2
+                    /
                     (
-                        N("Left of cell from position x in the string")+
-                        LEFT(
-                            [Damage Dice],
-                            (N("Position first d found -1 to delete d")+
-                            (SEARCH("d",[Damage Dice])-1))
-                        )
-                    )
-                )
-                *
-                (
-                    N("Reroll 1s or 2s on weapon dice only")+
-                    (
-                        1
-                        -
-                        (
-                            2
-                            /
-                            (
-                                N("Die size")+
-                                (
-                                    N("Right of cell from position x in the string.")+
-                                    RIGHT(
-                                        [Damage Dice],
-                                        (
-                                            (N("Length of string to subtract position of d")+
-                                            LEN([Damage Dice]))
-                                            -
-                                            (N("Search first found d")+
-                                            (SEARCH("d",[Damage Dice])))
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
+                        N("Die size")+
+                        N("Right of cell from position x in the string.")+
+                        RIGHT([@[Damage Dice]],(LEN([@[Damage Dice]])-SEARCH("d",[@[Damage Dice]])))
+                    )))
             ),
             (N("0 if no Great Weapon Fighting style applies.")+0)
         )
@@ -1242,89 +1200,53 @@ IF(
 Used referencing dice that are not weapon or base dice.
 Drag formula to make references work.
 
+AH2: Dice
+AP2: dmg type
+
 ```
 =N("Average damage")+
 IF(
     (N("Condition: has to have dice notation")+
-    COUNT(SEARCH("d",AD2))>0),
+    COUNT(SEARCH("d",AH2))>0),
     (
         N("Base damage of the dice")+
+        ((
+            N("Number of Dice")+
+            N("Left of cell from position of 'd' in the string")+
+            LEFT(AH2,(SEARCH("d",AH2)-1))
+        )
+        *
         (
-            (
-                N("Number of Dice")+
-                (
-                    N("Left of cell from position x in the string")+
-                    LEFT(
-                        AD2,
-                        (N("Position first d found -1 to delete d")+
-                        (SEARCH("d",AD2)-1))
-                    )
-                )
-            )
-            *
-            (
-                N("Average roll for the die size")+
-                AVERAGE(
-                    N("Lowest roll possible")+
-                    1,
-                    (
-                        N("Die size")+
-                        (
-                            N("Right of cell from position x in the string.")+
-                            RIGHT(
-                                AD2,
-                                (
-                                    (N("Length of string to subtract position of d")+
-                                    LEN(AD2))
-                                    -
-                                    (N("Search first found d")+
-                                    (SEARCH("d",AD2)))
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+            N("Average roll for the die size")+
+            AVERAGE(
+                N("Lowest roll possible")+
+                1,
+                N("Die size")+
+                N("Right of cell from position x in the string.")+
+                RIGHT(AH2,(LEN(AH2)-SEARCH("d",AH2)))
+            ))
         )
         +
         N("Elemental Adept turn 1s into 2s.")+
         N("Average increases by 1/DieSize per die")+
         N("Condition: damage type matches EA type.")+
         IF(
-            (AM2=[@[Feat: Elemental Adept Element]]:[@[Feat: Elemental Adept Element]]),
+            (AP2=[@[Feat: Elemental Adept Element]]),
+            N("Add 1/DieSize per die")+
+            ((
+                N("Number of Dice")+
+                N("Left of cell from position of 'd' in the string")+
+                LEFT(AH2,(SEARCH("d",AH2)-1))
+            )
+            *
             (
+                1
+                /
                 (
-                    N("Number of Dice")+
-                    (
-                        N("Left of cell from position x in the string")+
-                        LEFT(
-                            AD2,
-                            (N("Position first d found -1 to delete d")+
-                            (SEARCH("d",AD2)-1))
-                        )
-                    )
-                )
-                *
-                (
-                    1
-                    /
-                    (
-                        N("Die size")+
-                        (
-                            N("Right of cell from position x in the string.")+
-                            RIGHT(
-                                AD2,
-                                (
-                                    (N("Length of string to subtract position of d")+
-                                    LEN(AD2))
-                                    -
-                                    (N("Search first found d")+
-                                    (SEARCH("d",AD2)))
-                                )
-                            )
-                        )
-                    )
-                )
+                    N("Die size")+
+                    N("Right of cell from position x in the string.")+
+                    RIGHT(AH2,(LEN(AH2)-SEARCH("d",AH2)))
+                ))
             ),
             (N("0 if no Elemental Adept applies.")+0)
         )
@@ -1347,7 +1269,7 @@ For the damage modifier based on your attack or casting ability.
 
 ```
 [[Great Weapon Master Bonus Dmg]]
-=IF([[Great Weapon Master -5 to hit for +10 dmg]]="YES",
+=IF([@[Great Weapon Master -5 to hit for +10 dmg]]="YES",
     10,"-")
 ```
 
@@ -1383,16 +1305,16 @@ Formula:
 =N("Average damage added on crit")+
 (
     N("Dr: Damage roll on hit is doubled")+
-    [Base Dice Dmg Avg]
+    [@[Base Dice Dmg Avg]]
     +
     N("Db+Dbn1+Dbn2...Any bonus dice in this range get doubled")+
-    SUM([Bonus Dice Dmg Avg]:[More Bonus Dice Dmg Avg])
+    SUM([@[Bonus Dice Dmg Avg]]:[@[More Bonus Dice Dmg Avg]])
     +
     N("Dxc: Damage that gets doubled but only added on crit")+
-    (2*[[Crit-only Mult Dice Dmg Avg]])
+    (2*[@[Crit-only Mult Dice Dmg Avg]])
     +
     N("Dxcn: Bonus damage that's added on crit but not doubled")+
-    [[Crit-only Flat Dice Dmg Avg]]
+    [@[Crit-only Flat Dice Dmg Avg]]
 )
 ```
 
@@ -1408,13 +1330,13 @@ Formula:
 =N("Average damage on hit")+
 (
     N("Dr: Damage roll on hit is doubled on crit")+
-    [Base Dice Dmg Avg]
+    [@[Base Dice Dmg Avg]]
     +
     N("Db+Dbn1+Dbn2...Any bonus dice in this range get doubled on crit")+
-    SUM([Bonus Dice Dmg Avg]:[More Bonus Dice Dmg Avg])
+    SUM([@[Bonus Dice Dmg Avg]]:[@[More Bonus Dice Dmg Avg]])
     +
     N("Dn: Damage bonus that is not doubled on crit")+
-    [[Non-crit Dice Dmg Avg]]
+    [@[Non-crit Dice Dmg Avg]]
 )
 ```
 
@@ -1432,10 +1354,10 @@ Spell DCs don't crit
 =N("Damage result in case of a crit")+
 (
     N("D: Average damage on hit")+
-    [Average Dice Damage on Hit]
+    [@[Average Dice Damage on Hit]]
     +
     N("Dc: Average damage added on crit")+
-    [Average Damage Added on Crit]
+    [@[Average Damage Added on Crit]]
 )
 ```
 
@@ -1451,25 +1373,25 @@ Formula:
 =N("Average damage on miss")+
 IF(
     OR(
-        [Accuracy]="SP DC MISS 1/2 DMG",
-        [Accuracy]="SP DC M 1/2 ENEMY DVG",
-        [Accuracy]="SP DC M 1/2 LEG RESIST",
-        [Accuracy]="SP DC M 1/2 EN DVG L-RES"
+        [@Accuracy]="SP DC MISS 1/2 DMG",
+        [@Accuracy]="SP DC M 1/2 ENEMY DVG",
+        [@Accuracy]="SP DC M 1/2 LEG RESIST",
+        [@Accuracy]="SP DC M 1/2 EN DVG L-RES"
     ),
     (
         (
             N("Dr: Damage roll on hit is halved")+
-            [Base Dice Dmg Avg]
+            [@[Base Dice Dmg Avg]]
             +
             N("B: Bonus modifiers halved too")+
             N("Spells don't get Great Weapon Master bonus damage")+
-            IF(ISNUMBER([Bonus Flat Dmg]),[Bonus Flat Dmg],0)
+            IF(ISNUMBER([@[Bonus Flat Dmg]]),[@[Bonus Flat Dmg]],0)
             +
             N("Db+Dbn1+Dbn2...Any bonus dice is halved too")+
-            SUM([Bonus Dice Dmg Avg]:[More Bonus Dice Dmg Avg])
+            SUM([@[Bonus Dice Dmg Avg]]:[@[More Bonus Dice Dmg Avg]])
             +
             N("Dn: Damage bonus that is not doubled on crit gets halved too")+
-            [[Non-crit Dice Dmg Avg]]
+            [@[Non-crit Dice Dmg Avg]]
         )
         /
         2
@@ -1495,33 +1417,33 @@ Formulas:
 =N("Damage per Attack per Target")+
 (
     (
-        [Crit % Chance]
+        [@[Crit % Chance]]
         *
-        [Average Damage Added on Crit]
+        [@[Average Damage Added on Crit]]
     )
     +
     (
         (N("Hx: Hit chance (excluding crit)")+
-        [[Non-crit Hit % Chance]])
+        [@[Non-crit Hit % Chance]])
         *
         (
             (N("D: Average damage on hit")+
-            [Average Dice Damage on Hit])
+            [@[Average Dice Damage on Hit]])
             +
             (N("B: Bonus modifiers")+
-            IF(ISNUMBER([Bonus Flat Dmg]),[Bonus Flat Dmg],0))
+            IF(ISNUMBER([@[Bonus Flat Dmg]]),[@[Bonus Flat Dmg]],0))
             +
             (N("GWMb: Great Weapon Master -5 to hit for +10 dmg option")+
-            IF(ISNUMBER([Great Weapon Master Bonus Dmg]),[Great Weapon Master Bonus Dmg],0))
+            IF(ISNUMBER([@[Great Weapon Master Bonus Dmg]]),[@[Great Weapon Master Bonus Dmg]],0))
         )
     )
     +
     (
         (N("M: Miss chance (for spell saves)")+
-        [[Miss % Chance]])
+        [@[Miss % Chance]])
         *
         (N("Dm: Average damage on miss (only for spell saves)")+
-        [Average Damage on Miss])
+        [@[Average Damage on Miss]])
     )
 )
 ```
@@ -1536,9 +1458,9 @@ Multiply by the times the attack is repeated and the number of targets
 =N("Average damage for the attack row")+
 (
     (N("R: Repeated attack times (must have the same bonuses applied)")+
-    IF(ISNUMBER([Repeat Attack Times]),[Repeat Attack Times],1))
+    IF(ISNUMBER([@[Repeat Attack Times]]),[@[Repeat Attack Times]],1))
     *
-    [Damage per Attack]
+    [@[Damage per Attack]]
 )
 ```
 
@@ -1549,10 +1471,10 @@ Multiply by the times the attack is repeated and the number of targets
 [Average Resulting Damage Total]
 =N("Damage per target*NumTargets")+
 (
-    [Average Resulting Damage per Target]
+    [@[Average Resulting Damage per Target]]
     *
     (N("AOE: Area of Effect targets (must have the same bonuses applied)")+
-    IF(ISNUMBER([Area of Effect Expected Targets]),[Area of Effect Expected Targets],1))
+    IF(ISNUMBER([@[Area of Effect Expected Targets]]),[@[Area of Effect Expected Targets]],1))
 )
 ```
 
@@ -1596,12 +1518,12 @@ Check if max row index for the current Tactic ID or (rounds with same tactic ID)
 ```
 [Average Round Damage Total]
 =IF(
-    ISNUMBER([Average Round Damage per Target]),
+    ISNUMBER([@[Average Round Damage per Target]]),
     (
-        [Average Round Damage per Target]
+        [@[Average Round Damage per Target]]
         *
         (N("AOE: Area of Effect targets (must have the same bonuses applied)")+
-        IF(ISNUMBER([Area of Effect Expected Targets]),[Area of Effect Expected Targets],1))
+        IF(ISNUMBER([@[Area of Effect Expected Targets]]),[@[Area of Effect Expected Targets]],1))
     ),
     "-"
 )
@@ -1676,7 +1598,7 @@ Only show if the next row is a different tactic ID or empty.
             [@[Average Tactic Damage per Target]])
             /
             (N("Number of rounds")+
-            [@[Round]])
+            [@Round])
         )
     ),
     "-"
@@ -1698,7 +1620,7 @@ Only show if the next row is a different tactic ID or empty.
             [@[Average Tactic Damage Total]])
             /
             (N("Number of rounds")+
-            [@[Round]])
+            [@Round])
         )
     ),
     "-"
@@ -1744,26 +1666,26 @@ Now, checking the Dungeon Master's Guide, page 274 under 'Creating Quick Monster
 ```
 [Max Expected Enemy HP at CR or LV]
 =IFS(
-    [LV or CR]=1,  85,
-    [LV or CR]=2,  100,
-    [LV or CR]=3,  115,
-    [LV or CR]=4,  130,
-    [LV or CR]=5,  145,
-    [LV or CR]=6,  160,
-    [LV or CR]=7,  175,
-    [LV or CR]=8,  190,
-    [LV or CR]=9,  205,
-    [LV or CR]=10, 220,
-    [LV or CR]=11, 235,
-    [LV or CR]=12, 250,
-    [LV or CR]=13, 265,
-    [LV or CR]=14, 280,
-    [LV or CR]=15, 295,
-    [LV or CR]=16, 310,
-    [LV or CR]=17, 325,
-    [LV or CR]=18, 340,
-    [LV or CR]=19, 355,
-    [LV or CR]=20, 400
+    [@[LV or CR]]=1,  85,
+    [@[LV or CR]]=2,  100,
+    [@[LV or CR]]=3,  115,
+    [@[LV or CR]]=4,  130,
+    [@[LV or CR]]=5,  145,
+    [@[LV or CR]]=6,  160,
+    [@[LV or CR]]=7,  175,
+    [@[LV or CR]]=8,  190,
+    [@[LV or CR]]=9,  205,
+    [@[LV or CR]]=10, 220,
+    [@[LV or CR]]=11, 235,
+    [@[LV or CR]]=12, 250,
+    [@[LV or CR]]=13, 265,
+    [@[LV or CR]]=14, 280,
+    [@[LV or CR]]=15, 295,
+    [@[LV or CR]]=16, 310,
+    [@[LV or CR]]=17, 325,
+    [@[LV or CR]]=18, 340,
+    [@[LV or CR]]=19, 355,
+    [@[LV or CR]]=20, 400
 )
 ```
 
@@ -1773,24 +1695,24 @@ Now, checking the Dungeon Master's Guide, page 274 under 'Creating Quick Monster
 ```
 [DPR per Target Rating]
 =IF(
-    ISNUMBER([Damage per Round per Target]),
+    ISNUMBER([@[Damage per Round per Target]]),
     IFS(
-        ([Damage per Round per Target]>
-            ([Max Expected Enemy HP at CR or LV]/3)),
+        ([@[Damage per Round per Target]]>
+            ([@[Max Expected Enemy HP at CR or LV]]/3)),
             5,
-        ([Damage per Round per Target]>
-            ([Max Expected Enemy HP at CR or LV]/6)),
+        ([@[Damage per Round per Target]]>
+            ([@[Max Expected Enemy HP at CR or LV]]/6)),
             4,
-        ([Damage per Round per Target]>
-            ([Max Expected Enemy HP at CR or LV]/12)),
+        ([@[Damage per Round per Target]]>
+            ([@[Max Expected Enemy HP at CR or LV]]/12)),
             3,
-        ([Damage per Round per Target]>
-            ([Max Expected Enemy HP at CR or LV]/24)),
+        ([@[Damage per Round per Target]]>
+            ([@[Max Expected Enemy HP at CR or LV]]/24)),
             2,
-        ([Damage per Round per Target]<=
-            ([Max Expected Enemy HP at CR or LV]/24)),
+        ([@[Damage per Round per Target]]<=
+            ([@[Max Expected Enemy HP at CR or LV]]/24)),
             1,
-        ([Damage per Round per Target]=0),
+        ([@[Damage per Round per Target]]=0),
             0
     ),
     "-"
@@ -1807,24 +1729,24 @@ Nevertheless, it's good to know the theoretical rating... although I'm not sure 
 ```
 [Total DPR Rating]
 =IF(
-    ISNUMBER([Total Damage per Round]),
+    ISNUMBER([@[Total Damage per Round]]),
     IFS(
-        ([Total Damage per Round]>
-            ([Max Expected Enemy HP at CR or LV]/3)),
+        ([@[Total Damage per Round]]>
+            ([@[Max Expected Enemy HP at CR or LV]]/3)),
             5,
-        ([Total Damage per Round]>
-            ([Max Expected Enemy HP at CR or LV]/6)),
+        ([@[Total Damage per Round]]>
+            ([@[Max Expected Enemy HP at CR or LV]]/6)),
             4,
-        ([Total Damage per Round]>
-            ([Max Expected Enemy HP at CR or LV]/12)),
+        ([@[Total Damage per Round]]>
+            ([@[Max Expected Enemy HP at CR or LV]]/12)),
             3,
-        ([Total Damage per Round]>
-            ([Max Expected Enemy HP at CR or LV]/24)),
+        ([@[Total Damage per Round]]>
+            ([@[Max Expected Enemy HP at CR or LV]]/24)),
             2,
-        ([Total Damage per Round]<=
-            ([Max Expected Enemy HP at CR or LV]/24)),
+        ([@[Total Damage per Round]]<=
+            ([@[Max Expected Enemy HP at CR or LV]]/24)),
             1,
-        ([Total Damage per Round]=0),
+        ([@[Total Damage per Round]]=0),
             0
     ),
     "-"
@@ -1837,33 +1759,34 @@ Nevertheless, it's good to know the theoretical rating... although I'm not sure 
 ```
 [DPR per Target Rating Description]
 =IFS(
-    ISNUMBER([DPR per Target Rating])=FALSE,"-",
-    [DPR per Target Rating]=0,"☆☆☆  No damage",
-    [DPR per Target Rating]=1,"🡇🡇🡇  Not helping (lowest)",
-    [DPR per Target Rating]=2,"★☆☆  Low (support, control, debuff)",
-    [DPR per Target Rating]=3,"★★☆  Target (expected)",
-    [DPR per Target Rating]=4,"★★★  High (heavy hitter)",
-    [DPR per Target Rating]=5,"🕱🕱🕱🕱  Over Powered (dude stop)"
+    ISNUMBER([@[DPR per Target Rating]])=FALSE,"-",
+    [@[DPR per Target Rating]]=0,"☆☆☆  No damage",
+    [@[DPR per Target Rating]]=1,"🡇🡇🡇  Lowest (not helping)",
+    [@[DPR per Target Rating]]=2,"★☆☆  Low (support, control, debuff)",
+    [@[DPR per Target Rating]]=3,"★★☆  Target (expected)",
+    [@[DPR per Target Rating]]=4,"★★★  High (heavy hitter)",
+    [@[DPR per Target Rating]]=5,"🕱🕱🕱🕱  Deadly"
 )
 ```
 
 ```
 [Total DPR Rating Description]
 =IFS(
-    ISNUMBER([Total DPR Rating])=FALSE,"-",
-    [Total DPR Rating]=0,"☆☆☆  No damage",
-    [Total DPR Rating]=1,"🡇🡇🡇  Not helping (lowest)",
-    [Total DPR Rating]=2,"★☆☆  Low (support, control, debuff)",
-    [Total DPR Rating]=3,"★★☆  Target (expected)",
-    [Total DPR Rating]=4,"★★★  High (heavy hitter)",
-    [Total DPR Rating]=5,"🕱🕱🕱🕱  Over Powered (dude stop)"
+    ISNUMBER([@[Total DPR Rating]])=FALSE,"-",
+    [@[Total DPR Rating]]=0,"☆☆☆  No damage",
+    [@[Total DPR Rating]]=1,"🡇🡇🡇  Lowest (not helping)",
+    [@[Total DPR Rating]]=2,"★☆☆  Low (support, control, debuff)",
+    [@[Total DPR Rating]]=3,"★★☆  Target (expected)",
+    [@[Total DPR Rating]]=4,"★★★  High (heavy hitter)",
+    [@[Total DPR Rating]]=5,"🕱🕱🕱🕱  Deadly"
 )
 ```
 
 Ratings
 
-1: 🡇🡇🡇  Not helping (lowest)  
+0: ☆☆☆  No damage  
+1: 🡇🡇🡇  Lowest (not helping)  
 2: ★☆☆  Low (support, control, debuff)  
 3: ★★☆  Target (expected)  
 4: ★★★  High (heavy hitter)  
-5: 🕱🕱🕱🕱  Over Powered (dude stop)  
+5: 🕱🕱🕱🕱  Deadly  

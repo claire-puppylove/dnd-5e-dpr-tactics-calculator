@@ -13,7 +13,7 @@ The Rating Column is automatic, but no text can be output, so I'll add a manual 
         L4=0,
             "☆☆☆  No damage",
         AND(L4>0,L4<2),
-            "🡇🡇🡇  Not helping (lowest)",
+            "🡇🡇🡇  Lowest (not helping)",
         AND(L4>=2,L4<3),
             "★☆☆  Low (support, control, debuff)",
         AND(L4>=3,L4<4),
@@ -21,7 +21,7 @@ The Rating Column is automatic, but no text can be output, so I'll add a manual 
         AND(L4>=4,L4<5),
             "★★★  High (heavy hitter)",
         L4=5,
-            "🕱🕱🕱🕱  Over Powered (dude stop)",
+            "🕱🕱🕱🕱  Deadly",
         1,"-"
     ),
     ""
@@ -32,11 +32,11 @@ I also decided to do one by one in conditional formatting:
 
 ```
 =0: "☆☆☆  No damage"
-<2: "🡇🡇🡇  Not helping (lowest)"
+<2: "🡇🡇🡇  Lowest (not helping)"
 <3: "★☆☆  Low (support, control, debuff)"
 <4: "★★☆  Target (expected)"
 <5: "★★★  High (heavy hitter)"
-=5: "🕱🕱🕱🕱  Over Powered (dude stop)"
+=5: "🕱🕱🕱🕱  Deadly"
 ```
 
 But it goes away if I change the table...never mind.

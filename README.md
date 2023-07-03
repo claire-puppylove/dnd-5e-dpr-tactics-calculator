@@ -10,7 +10,7 @@ There is also a [Comprehensive DPR Calculator](https://forums.giantitp.com/showt
 
 However, I wanted to list all my different spells and attacks and even considered doing combinations of attacks across different rounds of combat. Say you spend a round casting a debuff spell, how much is that going to increase DPR in future rounds? Or perhaps you're up against an enemy with legendary resistances and you need to calculate how many attacks is it going to take you to do some good damage with saving throw spells, or perhaps you should stick to attack roll spells...
 
-Oh! not to mention, lots of DPR calculators assume that you're not casting spells that do damage on a miss.
+Oh! Not to mention, lots of DPR calculators assume that you're not casting spells that do damage on a miss.
 
 So I made my own. I present to you the **DPR Tactics Calculator**.
 
@@ -18,7 +18,7 @@ So I made my own. I present to you the **DPR Tactics Calculator**.
 
 ### Excel (backward-compatible)
 
-Currently the spreadsheet has a limitation to only one die reading per cell.
+Currently the spreadsheet has a limitation of only one die reading per cell.
 
 The planned spreadsheet can fix that but it uses some functions only available to Microsoft 365, however, the online free version should suffice.
 
@@ -26,7 +26,7 @@ The planned spreadsheet can fix that but it uses some functions only available t
 
 ## Documentation
 
-I made note of all the formulas in easier to read format.
+I made note of all the formulas in an easier-to-read format.
 
 - Excel (backward-compatible)
     + [DPR Calculator spreadsheet formulas](./excel_backwards_compatible/documentation/DPR%20Calculator%20spreadsheet%20formulas.md)
@@ -82,6 +82,7 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
     + Saving throw spells with half damage on miss, considering legendary resistances
     + Saving throw spells when the enemy is disadvantaged, considering legendary resistances
     + Saving throw spells with enemy disadvantage that do half damage on miss, considering legendary resistances
+- *Enemy Paralyzed close-range auto-crit on hit*: This toggle makes all hits critical hits. The calculator will treat the accuracy the same, so be sure that it's set on advantage unless you have a reason not to.
 - **Legendary resistances counter**: Starting at 3 but manually modifiable, if your tactics depend on getting those resistances down, this calculator lets you check which way to spend those spell slots is better
 - Display of probabilities:
     + Critical Hit % chance
@@ -122,13 +123,13 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
 - DPR per Target Rating: Thanks to RPGBOT's [DnD 5e – The Fundamental Math of Character Optimization](https://rpgbot.net/dnd5/characters/fundamental_math/), I got some data as to how to make an automatic rating calculation. You get the DPR and check the level, and trusting the words of this article, you can know how well you stand instantly in my calculator. An additional "No damage" rating helps to not get a bad rating if you are actually casting debuffs and other useful non-damaging spells, or perhaps using the Help action, or even Healing yourself or others. You could technically input other player's actions in the tactic as well to up the rating if you would prefer to think about it that way.
     + Formula: Considering the Max Enemy HP at that CR, 3 rounds for OP, 6 rounds for high, 12 rounds for target, 24 rounds for low, and anything higher is not helping.
     + Ratings:
-        * Rating 0: "☆☆☆  No damage"
-        * Rating 1: "🡇🡇🡇  Not helping (lowest)"
-        * Rating 2: "★☆☆  Low (support, control, debuff)" 
-        * Rating 3: "★★☆  Target (expected)"
-        * Rating 4: "★★★  High (heavy hitter)"
-        * Rating 5: "🕱🕱🕱🕱  Over Powered (dude stop)"
-- Total DPR Rating: This is an experimental field. With AOE attacks, the more enemies the more powerful the spell is, but any spell with more than 3 targets ends up rating as Over Powered with the current math. I am not sure if this is a correct interpretation, or if I should modify the math to account for AOE...
+        * Rating 0: ☆☆☆  No damage
+        * Rating 1: 🡇🡇🡇  🡇🡇🡇  Lowest (not helping)
+        * Rating 2: ★☆☆  Low (support, control, debuff)
+        * Rating 3: ★★☆  Target (expected)
+        * Rating 4: ★★★  High (heavy hitter)
+        * Rating 5: 🕱🕱🕱🕱  Deadly
+- Total DPR Rating: This is an experimental field. With AOE attacks, the more enemies the more powerful the spell is, but any spell with more than 3 targets ends up rating as Deadly with the current math. I am not sure if this is a correct interpretation, or if I should modify the math to account for AOE...
 - Notes section: Just in case
 
 ## Future work
@@ -140,6 +141,6 @@ I want to make an Office 365 version where added dice notation (e.g. 1d8+2d6) ca
 - [DnD 5e - Damage per Round | RPGBOT](https://rpgbot.net/dnd5/characters/damage-per-round/): Most of the formulas I obtained from this guide. However, RPGBOT's calculator uses Min to Hit instead of modifiers against enemy AC. I did some calculations of my own to figure out the formula used there.
 - [DnD 5e – DPR Calculator | RPGBOT](https://rpgbot.net/dnd5/tools/dpr-calculator/): I actually got my inspiration for this project by using this calculator and realizing I had bigger plans than I could type in my cellphone.
 - [DnD 5e – The Fundamental Math of Character Optimization | RPGBOT](https://rpgbot.net/dnd5/characters/fundamental_math/): Helped me establish the DPR rating calculations.
-- [Comprehensive DPR Calculator | LudicSavant](https://forums.giantitp.com/showthread.php?582779-Comprehensive-DPR-Calculator-(v2-0)) and it's [documentation](https://docs.google.com/document/u/1/d/11eTMZPPxWXHY0rQEhK1msO-40BcCGrzArSl4GX4CiJE/edit?pli=1) helped me figure out the formulas for Halfling luck and for Elven Accuracy. It also made me realize I need to add Great Weapon Master feat to the calculations as an option.
+- [Comprehensive DPR Calculator | LudicSavant](https://forums.giantitp.com/showthread.php?582779-Comprehensive-DPR-Calculator-(v2-0)) and its [documentation](https://docs.google.com/document/u/1/d/11eTMZPPxWXHY0rQEhK1msO-40BcCGrzArSl4GX4CiJE/edit?pli=1) helped me figure out the formulas for Halfling luck and for Elven Accuracy. It also made me realize I need to add the Great Weapon Master feat to the calculations as an option.
 - Dungeon Master's Guide for AOE expected values and expected enemy HP
 - [This guide with all ways to increase to hit bonus | u/wateryoshi on Reddit](https://www.reddit.com/r/dndnext/comments/km4i7x/heres_every_way_to_increase_your_to_hit_attack/)
