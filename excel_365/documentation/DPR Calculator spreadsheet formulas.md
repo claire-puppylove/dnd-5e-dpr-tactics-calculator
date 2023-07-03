@@ -1877,12 +1877,12 @@ Nevertheless, it's good to know the theoretical rating... although I'm not sure 
 [DPR per Target Rating Description]
 =IFS(
     ISNUMBER([@[DPR per Target Rating]])=FALSE,"-",
-    [@[DPR per Target Rating]]=0,"☆☆☆  No damage",
-    [@[DPR per Target Rating]]=1,"🡇🡇🡇  Lowest (not helping)",
-    [@[DPR per Target Rating]]=2,"★☆☆  Low (support, control, debuff)",
-    [@[DPR per Target Rating]]=3,"★★☆  Target (expected)",
-    [@[DPR per Target Rating]]=4,"★★★  High (heavy hitter)",
-    [@[DPR per Target Rating]]=5,"🕱🕱🕱🕱  Deadly"
+    [@[DPR per Target Rating]]=0,"☆☆☆☆  No damage",
+    [@[DPR per Target Rating]]=1,"★☆☆☆  Lowest (not helping)",
+    [@[DPR per Target Rating]]=2,"★★☆☆  Low (support, control, debuff)",
+    [@[DPR per Target Rating]]=3,"★★★☆  Target (expected)",
+    [@[DPR per Target Rating]]=4,"★★★★  High (heavy hitter)",
+    [@[DPR per Target Rating]]=5,"🕱🕱🕱🕱🕱  Deadly"
 )
 ```
 
@@ -1890,20 +1890,20 @@ Nevertheless, it's good to know the theoretical rating... although I'm not sure 
 [Total DPR Rating Description]
 =IFS(
     ISNUMBER([@[Total DPR Rating]])=FALSE,"-",
-    [@[Total DPR Rating]]=0,"☆☆☆  No damage",
-    [@[Total DPR Rating]]=1,"🡇🡇🡇  Lowest (not helping)",
-    [@[Total DPR Rating]]=2,"★☆☆  Low (support, control, debuff)",
-    [@[Total DPR Rating]]=3,"★★☆  Target (expected)",
-    [@[Total DPR Rating]]=4,"★★★  High (heavy hitter)",
-    [@[Total DPR Rating]]=5,"🕱🕱🕱🕱  Deadly"
+    [@[Total DPR Rating]]=0,"☆☆☆☆  No damage",
+    [@[Total DPR Rating]]=1,"★☆☆☆  Lowest (not helping)",
+    [@[Total DPR Rating]]=2,"★★☆☆  Low (support, control, debuff)",
+    [@[Total DPR Rating]]=3,"★★★☆  Target (expected)",
+    [@[Total DPR Rating]]=4,"★★★★  High (heavy hitter)",
+    [@[Total DPR Rating]]=5,"🕱🕱🕱🕱🕱  Deadly"
 )
 ```
 
 Ratings
 
-0: ☆☆☆  No damage  
-1: 🡇🡇🡇  Lowest (not helping)  
-2: ★☆☆  Low (support, control, debuff)  
-3: ★★☆  Target (expected)  
-4: ★★★  High (heavy hitter)  
-5: 🕱🕱🕱🕱  Deadly  
+0: ☆☆☆☆  No damage  
+1: ★☆☆☆  Lowest (not helping)  
+2: ★★☆☆  Low (support, control, debuff)  
+3: ★★★☆  Target (expected)  
+4: ★★★★  High (heavy hitter)  
+5: 🕱🕱🕱🕱🕱  Deadly  

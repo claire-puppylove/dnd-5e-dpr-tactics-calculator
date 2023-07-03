@@ -131,12 +131,12 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
 - DPR per Target Rating: Thanks to RPGBOT's [DnD 5e – The Fundamental Math of Character Optimization](https://rpgbot.net/dnd5/characters/fundamental_math/), I got some data as to how to make an automatic rating calculation. You get the DPR and check the level, and trusting the words of this article, you can know how well you stand instantly in my calculator. An additional "No damage" rating helps to not get a bad rating if you are actually casting debuffs and other useful non-damaging spells, or perhaps using the Help action, or even Healing yourself or others. You could technically input other player's actions in the tactic as well to up the rating if you would prefer to think about it that way.
     + Formula: Considering the Max Enemy HP at that CR, 3 rounds for OP, 6 rounds for high, 12 rounds for target, 24 rounds for low, and anything higher is not helping.
     + Ratings:
-        * Rating 0: ☆☆☆  No damage
-        * Rating 1: 🡇🡇🡇  🡇🡇🡇  Lowest (not helping)
-        * Rating 2: ★☆☆  Low (support, control, debuff)
-        * Rating 3: ★★☆  Target (expected)
-        * Rating 4: ★★★  High (heavy hitter)
-        * Rating 5: 🕱🕱🕱🕱  Deadly
+        * Rating 0: ☆☆☆☆  No damage
+        * Rating 1: ★☆☆☆  Lowest (not helping)
+        * Rating 2: ★★☆☆  Low (support, control, debuff)
+        * Rating 3: ★★★☆  Target (expected)
+        * Rating 4: ★★★★  High (heavy hitter)
+        * Rating 5: 🕱🕱🕱🕱🕱  Deadly
 - Total DPR Rating: This is an experimental field. With AOE attacks, the more enemies the more powerful the spell is, but any spell with more than 3 targets ends up rating as Deadly with the current math. I am not sure if this is a correct interpretation, or if I should modify the math to account for AOE...
 - Notes section: Just in case
 
