@@ -18,11 +18,15 @@ So I made my own. I present to you the **DPR Tactics Calculator**.
 
 ### Excel (backward-compatible)
 
-Currently the spreadsheet has a limitation of only one die reading per cell.
+Currently the backward-compatible spreadsheet has a limitation of only one die reading per cell.
 
-The planned spreadsheet can fix that but it uses some functions only available to Microsoft 365, however, the online free version should suffice.
+This should also work in Kingsoft's WPS Spreadsheet free version (tested 2019 version) or LibreOffice Calc (tested 7.5.4 version)
 
-* Note: In the future, I plan to make a python version that takes CSV files as input.
+### Excel 365
+
+The Microsoft 365 spreadsheet can read added dice notation (e.g. 1d8+1d4).
+
+However if you don't have 365 the online free version should suffice.
 
 ## Documentation
 
@@ -31,6 +35,10 @@ I made note of all the formulas in an easier-to-read format.
 - Excel (backward-compatible)
     + [DPR Calculator spreadsheet formulas](./excel_backwards_compatible/documentation/DPR%20Calculator%20spreadsheet%20formulas.md)
     + [Pivot Table spreadsheet formulas](./excel_backwards_compatible/documentation/Pivot%20Table%20spreadsheet%20formulas.md)
+- Excel 365
+    + [DPR Calculator spreadsheet formulas](./excel_365/documentation/DPR%20Calculator%20spreadsheet%20formulas.md)
+    + [Pivot Table spreadsheet formulas](./excel_365/documentation/Pivot%20Table%20spreadsheet%20formulas.md)
+    
 
 ## Terminology
 
@@ -134,7 +142,7 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
 
 ## Future work
 
-I want to make an Office 365 version where added dice notation (e.g. 1d8+2d6) can be read in a single cell, and therefore all the extra cells can become redundant.
+In the future, I plan to make a python version that takes CSV files as input to be free of proprietary software.
 
 ## References
 
