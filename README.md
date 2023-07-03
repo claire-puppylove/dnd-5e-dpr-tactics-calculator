@@ -53,7 +53,7 @@ Therefore you got:
 - Average Tactic Damage: The total expected damage for all the rounds it took to perform a tactic
 - Damage per Round: The average damage per round when dividing the tactic damage by the number of rounds
 
-## Functions
+## Features
 
 Since I was inspired by RPGBOT, most of the initial functions are the same, but I added some more.
 

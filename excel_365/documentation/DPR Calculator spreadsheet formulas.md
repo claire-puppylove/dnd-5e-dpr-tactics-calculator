@@ -13,8 +13,13 @@
         - [right of d](#right-of-d)
         - [Single dice notation \(e.g. 1d8\)](#single-dice-notation-eg-1d8)
         - [Splitting by + sign \(e.g. 1d8+1d4\)](#splitting-by--sign-eg-1d81d4)
-        - [Turn 1s into 2s of added notation for Elemental Adept](#turn-1s-into-2s-of-added-notation-for-elemental-adept)
-    - [Reroll 1s and 2s  of added notation for Great Weapon Fighting Style](#reroll-1s-and-2s--of-added-notation-for-great-weapon-fighting-style)
+    - [Turn 1s into 2s for Elemental Adept](#turn-1s-into-2s-for-elemental-adept)
+        - [Turn 1s into 2s of single dice notation](#turn-1s-into-2s-of-single-dice-notation)
+        - [Turn 1s into 2s of added dice notation](#turn-1s-into-2s-of-added-dice-notation)
+    - [Reroll 1s and 2s for Great Weapon Fighting Style](#reroll-1s-and-2s-for-great-weapon-fighting-style)
+        - [Reroll 1s and 2s for single dice notation](#reroll-1s-and-2s-for-single-dice-notation)
+        - [Reroll 1s and 2s for added dice notation](#reroll-1s-and-2s-for-added-dice-notation)
+    - [Average Dice Damage](#average-dice-damage)
 - [Modifiers](#modifiers)
     - [Halfling](#halfling)
     - [Lucky feat or Fortune's Blessing](#lucky-feat-or-fortunes-blessing)
@@ -136,7 +141,7 @@ If so, add columns between AL and AM.
 #### left of d
 
 ```
-function NUMDICE()
+function NumDice()
 
 =LAMBDA(
     dice,
@@ -144,13 +149,16 @@ function NUMDICE()
     N("Left of cell from position of 'd' in the string")+
     IF(COUNT(SEARCH("d",dice))>0,
         LEFT(dice,(SEARCH("d",dice)-1)),
-        (N("0 if no dice found.")+0))
-)()
+        N("No dice found")+0)
+)
 ```
 
-and without condition or lambda:
+and without condition:
 ```
-=(
+function NumDiceA()
+
+=LAMBDA(
+    dice,
     N("Number of Dice")+
     N("Left of cell from position of 'd' in the string")+
     LEFT(dice,(SEARCH("d",dice)-1))
@@ -161,7 +169,7 @@ and without condition or lambda:
 #### right of d
 
 ```
-function DICESIZE()
+function DieSize()
 
 =LAMBDA(
     dice,
@@ -169,13 +177,16 @@ function DICESIZE()
     N("Right of cell from position x in the string.")+
     IF(COUNT(SEARCH("d",dice))>0,
         RIGHT(dice,(LEN(dice)-SEARCH("d",dice))),
-        (N("0 if no dice found.")+0))
-)()
+        N("No dice found")+0)
+)
 ```
 
-and without condition or lambda:
+and without condition:
 ```
-=(
+function DieSizeA()
+
+=LAMBDA(
+    dice,
     N("Die size")+
     N("Right of cell from position x in the string.")+
     RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
@@ -185,194 +196,252 @@ and without condition or lambda:
 <a id="single-dice-notation-eg-1d8"></a>
 #### Single dice notation (e.g. 1d8)
 
+Using previously defined functions:
+
+Using `NumDiceA()` and `DieSizeA()`
+\* It avoids nested IF to search for a 'd' character.
+
 ```
-function DICEAVERAGE()
+function DiceAverage()
 
 =LAMBDA(
     dice,
-    N("Average dice damage")+
-    IF(COUNT(SEARCH("d",dice))>0,
-        ((
-            N("Number of Dice")+
-            N("Left of cell from position of 'd' in the string")+
-            LEFT(dice,(SEARCH("d",dice)-1))
-        )
-        *
-        (
-            N("Average roll for the die size")+
-            AVERAGE(
-                N("Lowest roll possible")+
-                1,
-                N("Die size")+
-                N("Right of cell from position x in the string.")+
-                RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-            ))
-        ),
+    N("Average dice roll")+
+    N("No search for 'd' character in NumDiceA and DieSizeA")+
+    IF(
+        COUNT(SEARCH("d",dice))>0,
+        NumDiceA(dice)*AVERAGE(1,DieSizeA(dice)),
         N(dice)
     )
-)()
+)
 ```
 
-and without condition:
+
+and without condition (useful if the IF is external):
 ```
-=((
-    N("Number of Dice")+
-    N("Left of cell from position of 'd' in the string")+
-    LEFT(dice,(SEARCH("d",dice)-1))
-)
-*
-(
-    N("Average roll for the die size")+
-    AVERAGE(
-        N("Lowest roll possible")+
-        1,
-        N("Die size")+
-        N("Right of cell from position x in the string.")+
-        RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-    ))
+function DiceAverageA()
+
+=LAMBDA(
+    dice,
+    N("Average dice roll")+
+    N("No search for 'd' character")+
+    N("Useful for external IF")+
+    N("No search for 'd' character in NumDiceA and DieSizeA")+
+    NumDiceA(dice)*AVERAGE(1,DieSizeA(dice))
 )
 ```
 
 <a id="splitting-by--sign-eg-1d81d4"></a>
 #### Splitting by + sign (e.g. 1d8+1d4)
 
+Using `DiceAverage()`
+\* It avoids nested IF to search for a 'd' character.
 ```
-function DICESUMAVERAGE()
+function DiceSumAverage()
 
 =LAMBDA(
     dicesum,
-    SUM(MAP(
-        TEXTSPLIT(dicesum,"+"),
-        LAMBDA(
-            dice,
-            N("Average dice roll")+
-            IF(COUNT(SEARCH("d",dice))>0,
-                ((
-                    N("Number of Dice")+
-                    N("Left of cell from position of 'd' in the string")+
-                    LEFT(dice,(SEARCH("d",dice)-1))
+    SUM(MAP(TEXTSPLIT(dicesum,"+"),
+            LAMBDA(dice,DiceAverage(dice))))
+)
+```
+
+Using `DiceAverageA()`
+\* It doesn't search for a 'd' character to confirm at all. Useful for functions where the if is external.
+```
+function DiceSumAverageA()
+
+=LAMBDA(
+    dicesum,
+    SUM(MAP(TEXTSPLIT(dicesum,"+"),
+            LAMBDA(dice,DiceAverageA(dice))))
+)
+```
+
+
+<a id="turn-1s-into-2s-for-elemental-adept"></a>
+### Turn 1s into 2s for Elemental Adept
+
+<a id="turn-1s-into-2s-of-single-dice-notation"></a>
+#### Turn 1s into 2s of single dice notation
+
+Using `NumDiceA()` and `DieSizeA()` to avoid nested IFs.
+
+```
+function DiceLowerCapDiff()
+
+=LAMBDA(
+    dice,lower_cap,
+    N("The difference in average for a die where")+
+    N("each number lower than lower_cap is replaced with that value")+
+    IF(
+        COUNT(SEARCH("d",dice))>0,
+        NumDiceA(dice)*((lower_cap-1)/DieSizeA(dice)),
+        N("No dice found")
+    )
+)
+```
+
+and without condition (useful if the IF is external):
+```
+function DiceLowerCapDiffA()
+
+=LAMBDA(
+    dice,lower_cap,
+    N("The difference in average for a die where")+
+    N("each number lower than lower_cap is replaced with that value")+
+    NumDiceA(dice)*((lower_cap-1)/DieSizeA(dice))
+)
+```
+
+<a id="turn-1s-into-2s-of-added-dice-notation"></a>
+#### Turn 1s into 2s of added dice notation
+
+Using `DiceLowerCapDiff()` to avoid nested IFs.
+
+```
+function DiceSumLowerCapDiff()
+
+=LAMBDA(
+    dicesum,lower_cap,
+    SUM(MAP(TEXTSPLIT(dicesum,"+"),
+            LAMBDA(dice,DiceLowerCapDiff(dice,lower_cap))))
+)
+```
+
+Using `DiceLowerCapDiffA()` to avoid any IFs.
+
+```
+function DiceSumLowerCapDiffA()
+
+=LAMBDA(
+    dicesum,lower_cap,
+    SUM(MAP(TEXTSPLIT(dicesum,"+"),
+            LAMBDA(dice,DiceLowerCapDiffA(dice,lower_cap))))
+)
+```
+
+
+<a id="reroll-1s-and-2s-for-great-weapon-fighting-style"></a>
+### Reroll 1s and 2s for Great Weapon Fighting Style
+
+<a id="reroll-1s-and-2s-for-single-dice-notation"></a>
+#### Reroll 1s and 2s for single dice notation
+
+Using `NumDiceA()` and `DieSizeA()` to avoid nested IFs.
+
+```
+function DiceAverageRerollLowestDiff()
+
+=LAMBDA(
+    dice,lowest_cap,
+    N("Reroll results lower or equal to lowest_cap")+
+    IF(
+        COUNT(SEARCH("d",dice))>0,
+        NumDiceA(dice)*(1-(lowest_cap/DieSizeA(dice))),
+        N("No dice found")
+    )
+)
+```
+
+and without condition (useful if the IF is external):
+
+```
+function DiceAverageRerollLowestDiffA()
+
+=LAMBDA(
+    dice,lowest_cap,
+    N("Reroll results lower or equal to lowest_cap")+
+    NumDiceA(dice)*(1-(lowest_cap/DieSizeA(dice)))
+)
+```
+
+<a id="reroll-1s-and-2s-for-added-dice-notation"></a>
+#### Reroll 1s and 2s for added dice notation
+
+Using `DiceAverageRerollLowestDiff()` to avoid nested IFs.
+
+```
+function DiceSumAverageRerollLowestDiff()
+
+=LAMBDA(
+    dicesum,lowest_cap,
+    SUM(MAP(TEXTSPLIT(dicesum,"+"),
+            LAMBDA(dice,DiceAverageRerollLowestDiff(dice,lowest_cap))))
+)
+```
+
+Using `DiceAverageRerollLowestDiffA()` to avoid any IFs.
+
+```
+function DiceSumAverageRerollLowestDiffA()
+
+=LAMBDA(
+    dicesum,lowest_cap,
+    SUM(MAP(TEXTSPLIT(dicesum,"+"),
+            LAMBDA(dice,DiceAverageRerollLowestDiffA(dice,lowest_cap))))
+)
+```
+
+
+<a id="average-dice-damage"></a>
+### Average Dice Damage
+
+Formula:
+- NumDice*(avg(1,DieSize))
+    + Elemental Adept turn 1s into 2s:
+        * NumDice*(1/DieSize)
+        * But only if the damage types match
+    + If Great Weapon Fighting style:
+        * NumDice*(avg(1,DieSize)) + NumDice*(1-(2/DieSize))
+        * But only on the base damage dice
+
+```
+function AverageDiceDamage()
+
+=LAMBDA(
+    dicesum,
+    damage_type,
+    elemental_adept_element,
+    weapon_attack_bool,
+    great_weapon_fighting_YES_NO,
+    (
+        N("Average damage")+
+        IF(
+            COUNT(SEARCH("d",dicesum))>0,
+            (
+                N("Base damage of the dice")+
+                N("DiceSumAverageA() does not have internal search for 'd' to avoid redundancy")+
+                DiceSumAverageA(dicesum)
+                +
+                N("Elemental Adept turn 1s into 2s.")+
+                N("Average increases by 1/DieSize per die")+
+                N("Condition: damage type matches EA type.")+
+                IF(
+                    damage_type=elemental_adept_element,
+                    N("DiceSumLowerCapDiffA() does not have internal search for 'd' to avoid redundancy")+
+                    DiceSumLowerCapDiffA(dicesum,2),
+                    (N("0 if no Elemental Adept applies.")+0)
                 )
-                *
-                (
-                    N("Average roll for the die size")+
-                    AVERAGE(
-                        N("Lowest roll possible")+
-                        1,
-                        N("Die size")+
-                        N("Right of cell from position x in the string.")+
-                        RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-                    ))
-                ),
-                N(dice)
-            )
-        )
-    ))
-)()
-```
-
-And without condition:
-```
-function DICESUMAVERAGEX()
-
-=LAMBDA(
-    dicesum,
-    SUM(MAP(
-        TEXTSPLIT(dicesum,"+"),
-        LAMBDA(
-            dice,
-            N("Average dice roll")+
-            ((
-                N("Number of Dice")+
-                N("Left of cell from position of 'd' in the string")+
-                LEFT(dice,(SEARCH("d",dice)-1))
-            )
-            *
-            (
-                N("Average roll for the die size")+
-                AVERAGE(
-                    N("Lowest roll possible")+
-                    1,
-                    N("Die size")+
-                    N("Right of cell from position x in the string.")+
-                    RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-                ))
-            )
-        )
-    ))
-)()
-```
-
-<a id="turn-1s-into-2s-of-added-notation-for-elemental-adept"></a>
-#### Turn 1s into 2s of added notation for Elemental Adept
-
-Without condition since we will use it mid-formula anyways.
-
-```
-function DICEADDINVERSE()
-
-=LAMBDA(
-    dicesum,
-    SUM(MAP(
-        TEXTSPLIT(dicesum,"+"),
-        LAMBDA(
-            dice,
-            N("Add 1/DieSize per die")+
-            ((
-                N("Number of Dice")+
-                N("Left of cell from position of 'd' in the string")+
-                LEFT(dice,(SEARCH("d",dice)-1))
-            )
-            *
-            (
-                1
-                /
-                (
-                    N("Die size")+
-                    N("Right of cell from position x in the string.")+
-                    RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-                ))
-            )
-        )
-    ))
-)()
-```
-
-<a id="reroll-1s-and-2s--of-added-notation-for-great-weapon-fighting-style"></a>
-### Reroll 1s and 2s  of added notation for Great Weapon Fighting Style
-
-
-```
-=LAMBDA(
-    dicesum,
-    SUM(MAP(
-        TEXTSPLIT(dicesum,"+"),
-        LAMBDA(
-            dice,
-            N("Reroll 1s and 2s")+
-            ((
-                N("Number of Dice")+
-                N("Left of cell from position of 'd' in the string")+
-                LEFT(dice,(SEARCH("d",dice)-1))
-            )
-            *
-            (
-                1
-                -
-                (
-                    2
-                    /
+                +
+                IF(
+                    weapon_attack_bool=True,
                     (
-                        N("Die size")+
-                        N("Right of cell from position x in the string.")+
-                        RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-                    )))
-            )
+                        N("Great Weapon Fighting style reroll 1s and 2s once.")+
+                        IF(
+                            great_weapon_fighting_YES_NO="YES",
+                            N("DiceSumAverageRerollLowestDiffA() does not have internal search for 'd' to avoid redundancy")+
+                            DiceSumAverageRerollLowestDiffA(dicesum,2),
+                            (N("0 if no Great Weapon Fighting style applies.")+0)
+                        )
+                    )
+                )
+            ),
+            N(dicesum)
         )
-    ))
-)()
+    )
+)
 ```
-
-
 
 <a id="modifiers"></a>
 ## Modifiers
@@ -435,35 +504,7 @@ Here's a table of such possible effects.
 
 ```
 [Dice to attack roll average result]
-=LAMBDA(
-    dicesum,
-    SUM(MAP(
-        TEXTSPLIT(dicesum,"+"),
-        LAMBDA(
-            dice,
-            N("Average dice roll")+
-            IF(COUNT(SEARCH("d",dice))>0,
-                ((
-                    N("Number of Dice")+
-                    N("Left of cell from position of 'd' in the string")+
-                    LEFT(dice,(SEARCH("d",dice)-1))
-                )
-                *
-                (
-                    N("Average roll for the die size")+
-                    AVERAGE(
-                        N("Lowest roll possible")+
-                        1,
-                        N("Die size")+
-                        N("Right of cell from position x in the string.")+
-                        RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-                    ))
-                ),
-                N(dice)
-            )
-        )
-    ))
-)([@[Dice added to attack roll]])
+=DiceSumAverage([@[Dice added to attack roll]])
 ```
 
 
@@ -1185,112 +1226,17 @@ Formula:
         * NumDice*(avg(1,DieSize)) + NumDice*(1-(2/DieSize))
         * But only on the base damage dice
 
+
 ```
 [Base Dice Dmg Avg]
-=N("Average damage")+
-IF(
-    (N("Condition: has to have dice notation")+
-    COUNT(SEARCH("d",[@[Damage Dice]]))>0),
-    (
-        N("Base damage of the dice")+
-        LAMBDA(
-            dicesum,
-            SUM(MAP(
-                TEXTSPLIT(dicesum,"+"),
-                LAMBDA(
-                    dice,
-                    N("Average dice roll")+
-                    ((
-                        N("Number of Dice")+
-                        N("Left of cell from position of 'd' in the string")+
-                        LEFT(dice,(SEARCH("d",dice)-1))
-                    )
-                    *
-                    (
-                        N("Average roll for the die size")+
-                        AVERAGE(
-                            N("Lowest roll possible")+
-                            1,
-                            N("Die size")+
-                            N("Right of cell from position x in the string.")+
-                            RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-                        ))
-                    )
-                )
-            ))
-        )([@[Damage Dice]])
-        +
-        N("Elemental Adept turn 1s into 2s.")+
-        N("Average increases by 1/DieSize per die")+
-        N("Condition: damage type matches EA type.")+
-        IF(
-            ([@[Damage Type]]=[@[Feat: Elemental Adept Element]]),
-            LAMBDA(
-                dicesum,
-                SUM(MAP(
-                    TEXTSPLIT(dicesum,"+"),
-                    LAMBDA(
-                        dice,
-                        N("Add 1/DieSize per die")+
-                        ((
-                            N("Number of Dice")+
-                            N("Left of cell from position of 'd' in the string")+
-                            LEFT(dice,(SEARCH("d",dice)-1))
-                        )
-                        *
-                        (
-                            1
-                            /
-                            (
-                                N("Die size")+
-                                N("Right of cell from position x in the string.")+
-                                RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))                    
-                            ))
-                        )
-                    )
-                ))
-            )([@[Damage Dice]]),
-            (N("0 if no Elemental Adept applies.")+0)
-        )
-        +
-        N("Great Weapon Fighting style reroll 1s and 2s once.")+
-        IF(
-            ([@[Great Weapon Fighting Style]]="YES"),
-            LAMBDA(
-                dicesum,
-                SUM(MAP(
-                    TEXTSPLIT(dicesum,"+"),
-                    LAMBDA(
-                        dice,
-                        N("Reroll 1s and 2s")+
-                        ((
-                            N("Number of Dice")+
-                            N("Left of cell from position of 'd' in the string")+
-                            LEFT(dice,(SEARCH("d",dice)-1))
-                        )
-                        *
-                        (
-                            1
-                            -
-                            (
-                                2
-                                /
-                                (
-                                    N("Die size")+
-                                    N("Right of cell from position x in the string.")+
-                                    RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-                                )))
-                        )
-                    )
-                ))
-            )([@[Damage Dice]]),
-            (N("0 if no Great Weapon Fighting style applies.")+0)
-        )
-    ),
-    N([@[Damage Dice]])
-)
+=AverageDiceDamage(
+    [@[Damage Dice]],
+    [@[Damage Type]],
+    [@[Feat: Elemental Adept Element]],
+    True,
+    [@[Great Weapon Fighting Style]]
+    )
 ```
-
 
 <a id="average-damage-for-other-damage-dice-summed-notation-possible-eg-1d81d4"></a>
 ### Average Damage for other damage dice (summed notation possible (e.g. 1d8+1d4))
@@ -1298,78 +1244,11 @@ IF(
 Used referencing dice that are not weapon or base dice.
 Dragged formula to apply to other dice.
 
-AE2: dice
-AM2: dmg type
+AF2: dice
+AN2: dmg type
 
 ```
-=N("Average damage")+
-IF(
-    (N("Condition: has to have dice notation")+
-    COUNT(SEARCH("d",AE2))>0),
-    (
-        N("Base damage of the dice")+
-        LAMBDA(
-            dicesum,
-            SUM(MAP(
-                TEXTSPLIT(dicesum,"+"),
-                LAMBDA(
-                    dice,
-                    N("Average dice roll")+
-                    ((
-                        N("Number of Dice")+
-                        N("Left of cell from position of 'd' in the string")+
-                        LEFT(dice,(SEARCH("d",dice)-1))
-                    )
-                    *
-                    (
-                        N("Average roll for the die size")+
-                        AVERAGE(
-                            N("Lowest roll possible")+
-                            1,
-                            N("Die size")+
-                            N("Right of cell from position x in the string.")+
-                            RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))
-                        ))
-                    )
-                )
-            ))
-        )(AE2)
-        +
-        N("Elemental Adept turn 1s into 2s.")+
-        N("Average increases by 1/DieSize per die")+
-        N("Condition: damage type matches EA type.")+
-        IF(
-            (AM2=[@[Feat: Elemental Adept Element]]),
-            LAMBDA(
-                dicesum,
-                SUM(MAP(
-                    TEXTSPLIT(dicesum,"+"),
-                    LAMBDA(
-                        dice,
-                        N("Add 1/DieSize per die")+
-                        ((
-                            N("Number of Dice")+
-                            N("Left of cell from position of 'd' in the string")+
-                            LEFT(dice,(SEARCH("d",dice)-1))
-                        )
-                        *
-                        (
-                            1
-                            /
-                            (
-                                N("Die size")+
-                                N("Right of cell from position x in the string.")+
-                                RIGHT(dice,(LEN(dice)-SEARCH("d",dice)))                    
-                            ))
-                        )
-                    )
-                ))
-            )(AE2),
-            (N("0 if no Elemental Adept applies.")+0)
-        )
-    ),
-    N(AE2)
-)
+=AverageDiceDamage(AF2,AN2,$AL2,False,$AD2)
 ```
 
 
@@ -1386,8 +1265,7 @@ For the damage modifier based on your attack or casting ability.
 
 ```
 [[Great Weapon Master Bonus Dmg]]
-=IF([@[Great Weapon Master -5 to hit for +10 dmg]]="YES",
-    10,"-")
+=IF([@[Great Weapon Master -5 to hit for +10 dmg]]="YES",10,"-")
 ```
 
 <a id="resulting-damages"></a>
