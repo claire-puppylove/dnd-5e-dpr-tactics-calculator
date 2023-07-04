@@ -8,7 +8,10 @@ The Rating Column is automatic, but no text can be output, so I'll add a manual 
 
 ```
 =IF(
-    ISBLANK(L4)=FALSE,
+    AND(
+        ISBLANK(L4)=FALSE,
+        ISNUMBER($B4)=FALSE
+    ),
     IFS(
         L4=0,
             "☆☆☆☆  No damage",

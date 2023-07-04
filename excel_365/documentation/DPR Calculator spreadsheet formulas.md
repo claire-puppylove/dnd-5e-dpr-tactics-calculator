@@ -1405,7 +1405,7 @@ IF(
 
 Formulas:
 
-`DPA=(C*Dc)+(Hx*(D+B))+(M*(Dm))`
+`DPA=(C*Dc)+(H*(D+B))+(M*(Dm))`
 
 ```
 [Damage per Attack]
@@ -1418,8 +1418,8 @@ Formulas:
     )
     +
     (
-        (N("Hx: Hit chance (excluding crit)")+
-        [@[Non-crit Hit % Chance]])
+        (N("H: Hit chance (including crit)")+
+        [@[Hit % Chance]])
         *
         (
             (N("D: Average damage on hit")+
