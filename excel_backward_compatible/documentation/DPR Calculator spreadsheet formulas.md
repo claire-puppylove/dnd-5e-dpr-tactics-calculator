@@ -1697,6 +1697,8 @@ Now, checking the Dungeon Master's Guide, page 274 under 'Creating Quick Monster
 =IF(
     ISNUMBER([@[Damage per Round per Target]]),
     IFS(
+        ([@[Damage per Round per Target]]=0),
+            0,
         ([@[Damage per Round per Target]]>
             ([@[Max Expected Enemy HP at CR or LV]]/3)),
             5,
@@ -1711,9 +1713,7 @@ Now, checking the Dungeon Master's Guide, page 274 under 'Creating Quick Monster
             2,
         ([@[Damage per Round per Target]]<=
             ([@[Max Expected Enemy HP at CR or LV]]/24)),
-            1,
-        ([@[Damage per Round per Target]]=0),
-            0
+            1
     ),
     "-"
 )
@@ -1731,6 +1731,8 @@ Nevertheless, it's good to know the theoretical rating... although I'm not sure 
 =IF(
     ISNUMBER([@[Total Damage per Round]]),
     IFS(
+        ([@[Total Damage per Round]]=0),
+            0,
         ([@[Total Damage per Round]]>
             ([@[Max Expected Enemy HP at CR or LV]]/3)),
             5,
@@ -1745,9 +1747,7 @@ Nevertheless, it's good to know the theoretical rating... although I'm not sure 
             2,
         ([@[Total Damage per Round]]<=
             ([@[Max Expected Enemy HP at CR or LV]]/24)),
-            1,
-        ([@[Total Damage per Round]]=0),
-            0
+            1
     ),
     "-"
 )
