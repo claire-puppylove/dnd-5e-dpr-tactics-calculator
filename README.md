@@ -99,6 +99,7 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
 - Dice that you only roll on crits but you don't multiply (like Savage Attacks)
 - Dice that can't be multiplied even if you crit (like Booming Blade)
 - Bonus flat damage: Put your damage modifiers here, except for the GWM+10 that gets auto-added on another column
+- **Retaliatory dice damage** for when getting hit while you have Fire Shield cast. Flat damage is also possible for Armor of Agathys and such.
 - *Elemental Adept Feat* options: If the damage type matches, all your ones turn into twos. You get an extra 1/DieSize average damage per die.
     + Damage types for all your dice (for the elemental adept feat, or your own satisfaction)
 

@@ -55,6 +55,9 @@
         - [D: Damage on hit \(all applicable\)](#d-damage-on-hit-all-applicable)
         - [Dcr: Damage result on crit](#dcr-damage-result-on-crit)
         - [Dm: Damage on miss \(all applicable\) \(spells with 1/2 dmg only\)](#dm-damage-on-miss-all-applicable-spells-with-12-dmg-only)
+        - [De: Retaliatory damage on enemy hits](#de-retaliatory-damage-on-enemy-hits)
+            - [Enemy Hit % Chance](#enemy-hit--chance)
+            - [Average Damage on Retaliatory Dice](#average-damage-on-retaliatory-dice)
     - [Damage Aggregates](#damage-aggregates)
         - [DPA: Damage per Attack \(uses DPR formula\)](#dpa-damage-per-attack-uses-dpr-formula)
         - [Average Resulting Damage per target \(for the row\)](#average-resulting-damage-per-target-for-the-row)
@@ -1397,6 +1400,101 @@ IF(
 ```
 
 
+<a id="de-retaliatory-damage-on-enemy-hits"></a>
+#### De: Retaliatory damage on enemy hits
+
+Spells like Fire Shield and Shadow of Moil have an effect that only damages enemies when YOU are hit.
+I intend to calculate that too.
+
+<a id="enemy-hit--chance"></a>
+##### Enemy Hit % Chance
+
+Based on columns:
+
+- `[@[Armor Class (for Retaliatory Dmg)]]`
+- `[@[Enemy Accuracy]]`
+- `[@[Max Expected Enemy Hit Modifier]]`
+
+The first two are manual inputs. Your character AC and the Enemy Accuracy (limited to "-","STANDARD", "ADVANTAGE", "DISADVANTAGE")
+
+The Enemy hit modifier is calculated using the Dungeon Master's Guide, page 274, "Creating Quick Monster Stats"
+
+```
+[Max Expected Enemy Hit Modifier]
+=IFS(
+    [@[LV or CR]]=1,  3,
+    [@[LV or CR]]=2,  3,
+    [@[LV or CR]]=3,  4,
+    [@[LV or CR]]=4,  5,
+    [@[LV or CR]]=5,  6,
+    [@[LV or CR]]=6,  6,
+    [@[LV or CR]]=7,  6,
+    [@[LV or CR]]=8,  7,
+    [@[LV or CR]]=9,  7,
+    [@[LV or CR]]=10, 7,
+    [@[LV or CR]]=11, 8,
+    [@[LV or CR]]=12, 8,
+    [@[LV or CR]]=13, 8,
+    [@[LV or CR]]=14, 8,
+    [@[LV or CR]]=15, 8,
+    [@[LV or CR]]=16, 9,
+    [@[LV or CR]]=17, 10,
+    [@[LV or CR]]=18, 10,
+    [@[LV or CR]]=19, 10,
+    [@[LV or CR]]=20, 10
+)
+```
+
+
+```
+STANDARD:
+HE=1-((ArmorClass-EnemyModifier)/20)
+
+DISADVANTAGE:
+HEdvg=HE^2
+
+ADVANTAGE:
+HEadv=1-(1-HE)^2
+```
+
+```
+[Enemy Hit % Chance]
+=IFS(
+    [@[Enemy Accuracy]]="-",
+        0,
+    [@[Enemy Accuracy]]="STANDARD",
+        (1-(([@[Armor Class (for Retaliatory Dmg)]]
+            -
+            [@[Max Expected Enemy Hit Modifier]]
+            )/20)),
+    [@[Enemy Accuracy]]="DISADVANTAGE",
+        (1-(([@[Armor Class (for Retaliatory Dmg)]]
+            -
+            [@[Max Expected Enemy Hit Modifier]]
+            )/20))^2,
+    [@[Enemy Accuracy]]="ADVANTAGE",
+        (1-(1-
+            (1-(([@[Armor Class (for Retaliatory Dmg)]]
+            -
+            [@[Max Expected Enemy Hit Modifier]]
+            )/20))
+            )^2)
+)
+```
+
+<a id="average-damage-on-retaliatory-dice"></a>
+##### Average Damage on Retaliatory Dice
+
+```
+[Average Damage on Retaliatory Dice]
+=AverageDiceDamage(
+    [@[Retaliation Dmg Dice on Enemy Hit]],
+    [@[Retaliatory Dmg Type]],
+    [@[Feat: Elemental Adept Element]],
+    False,"NO"
+    )
+```
+
 <a id="damage-aggregates"></a>
 ### Damage Aggregates
 
@@ -1457,6 +1555,13 @@ Multiply by the times the attack is repeated and the number of targets
     *
     [@[Damage per Attack]]
 )
++
+N("Retaliatory dice damage gets added here")+
+(
+    [@[Enemy Hit % Chance]]
+    *
+    [@[Average Damage on Retaliatory Dice]]
+)
 ```
 
 <a id="average-resulting-damage-total"></a>
@@ -1466,10 +1571,26 @@ Multiply by the times the attack is repeated and the number of targets
 [Average Resulting Damage Total]
 =N("Damage per target*NumTargets")+
 (
-    [@[Average Resulting Damage per Target]]
+    (
+        [@[Average Resulting Damage per Target]]
+        -
+        (N("Retaliatory dice damage gets added here, but it doesn't get multiplied by target number")+
+        (
+            [@[Enemy Hit % Chance]]
+            *
+            [@[Average Damage on Retaliatory Dice]]
+        ))
+    )
     *
     (N("AOE: Area of Effect targets (must have the same bonuses applied)")+
     IF(ISNUMBER([@[Area of Effect Expected Targets]]),[@[Area of Effect Expected Targets]],1))
+)
++
+N("Retaliatory dice damage gets added here, but it doesn't get multiplied by target number")+
+(
+    [@[Enemy Hit % Chance]]
+    *
+    [@[Average Damage on Retaliatory Dice]]
 )
 ```
 
