@@ -57,9 +57,13 @@ Therefore you got:
 
 Since I was inspired by RPGBOT, most of the initial functions are the same, but I added some more.
 
+### Manual input
+
 - Row ID: Important for some other functions
 - Tactic ID: It keeps the tactic intact and grouped together when doing calculations, and it's better if it's descriptive for the summary table later on.
 - Character ID: It can be used as a filter in the summary table.
+- Description
+- Notes: just in case
 - Player or Enemy: It influences the assumed relative modifiers.
 - LV or CR: It influences the DPR rating at that level, and some relative modifiers.
 - Round: Keep track of which rounds do more damage.
@@ -73,9 +77,7 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
 - Great Weapon Master -5 to hit for +10 dmg: You can toggle this and not worry about writing those specifics, they get added automatically to their respective columns.
 - War Cleric Channel Divinity +10 to hit toggle
 - Dice added to attack rolls: Useful for Bless or Bardic Inspiration.
-- Assumed relative modifiers to hit: When you level up and the enemy levels up, how much are your chances actually increasing? This field updates automatically as you set your character's level. Additionally, it gets a -5 automatically if you use the GWM toggle described above, or +10 if the War Cleric toggle is active, and also it adds the dice added to the attack rolls by Bless or Bardic inspiration, but only if it's an attack roll (not added on save throw spells).
 - Optional relative modifiers to hit: For adding that +1 magic sword, or perhaps for characters with very good stats for their level, or perhaps -1 for stats under the expectations. This has to be something that's added from different sources than the automatic modifiers calculated above.
-- Min to Hit: After all is said and done, this automatically reflects how much you have to roll on your 1d20 to hit the target at this level.
 - Min to Crit: Some abilities like the Champion Fighter Improved Critical, or the Hexblade Warlock Hexblade's Curse let you crit on lower than 20.
 - Accuracy types: We got formulas for days
     + Standard
@@ -91,13 +93,26 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
     + Saving throw spells when the enemy is disadvantaged, considering legendary resistances
     + Saving throw spells with enemy disadvantage that do half damage on miss, considering legendary resistances
 - *Enemy Paralyzed close-range auto-crit on hit*: This toggle makes all hits critical hits. The calculator will treat the accuracy the same, so be sure that it's set on advantage unless you have a reason not to.
+- Area of Effect: will affect the expected number of targets on calculation
+- *Great Weapon Fighting Style* toggle: Since this ability lets you reroll some of the damage dice, I added the expected damage. (Note: it's (1-(2/DieSize)) per die)
+- Dice that you only roll on crits and get to multiply (like smites)
+- Dice that you only roll on crits but you don't multiply (like Savage Attacks)
+- Dice that can't be multiplied even if you crit (like Booming Blade)
+- Bonus flat damage: Put your damage modifiers here, except for the GWM+10 that gets auto-added on another column
+- *Elemental Adept Feat* options: If the damage type matches, all your ones turn into twos. You get an extra 1/DieSize average damage per die.
+    + Damage types for all your dice (for the elemental adept feat, or your own satisfaction)
+
+### Calculations
+
 - **Legendary resistances counter**: Starting at 3 but manually modifiable, if your tactics depend on getting those resistances down, this calculator lets you check which way to spend those spell slots is better
+- Assumed relative modifiers to hit: When you level up and the enemy levels up, how much are your chances actually increasing? This field updates automatically as you set your character's level. Additionally, it gets a -5 automatically if you use the GWM toggle described above, or +10 if the War Cleric toggle is active, and also it adds the dice added to the attack rolls by Bless or Bardic inspiration, but only if it's an attack roll (not added on save throw spells).
+- Min to Hit: After all is said and done, this automatically reflects how much you have to roll on your 1d20 to hit the target at this level.
 - Display of probabilities:
     + Critical Hit % chance
     + Hit % chance (including crits)
     + Hit % chance (NOT including crits)
     + Miss % chance
-- Area of Effect: Based on the DMG 'Adjudicating Areas of Effect' 249
+- Area of Effect Expected Targets: Based on the DMG 'Adjudicating Areas of Effect' 249
     + Area type
     + Size
     + Expected Targets
@@ -106,19 +121,16 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
         * Cylinder        : Radius / 5  (round up)
         * Line            : Length / 30 (round up)
         * Sphere or circle: Radius / 5  (round up)
-- *Great Weapon Fighting Style* toggle: Since this ability lets you reroll some of the damage dice, I added the expected damage. (Note: it's (1-(2/DieSize)) per die)
-- Dice that you only roll on crits and get to multiply (like smites)
-- Dice that you only roll on crits but you don't multiply (like Savage Attacks)
-- Dice that can't be multiplied even if you crit (like Booming Blade)
-- Bonus flat damage: Put your damage modifiers here, except for the GWM+10 that gets auto-added on the next column
 - Great Weapon Master Bonus Dmg: This becomes +10 automatically and added to the calculations if you activated the feature earlier.
-- *Elemental Adept Feat* options: If the damage type matches, all your ones turn into twos. You get an extra 1/DieSize average damage per die.
-    + Damage types for all your dice (for the elemental adept feat, or your own satisfaction)
+- Dice average damage for all types of dice (so the mid-calculation steps are visible)
 - Average Damage Added on Crit: so you can know exactly how much a crit helps you
 - Average Dice Damage on Hit
 - Average Resulting Crit Dice Damage: check it so you can have hopes and dreams
 - Average Damage on Miss: useful for those half damage spells
     + **Save throw spells miss damage**: This function I didn't see in many other places. My calculator outputs the average damage on a miss and multiplies it by the probability of a miss, and adds it to the damage calculations.
+
+Main results:
+
 - Damage per Attack: confirm before counting repetitions or multiple AOE targets.
 - Average Resulting Damage per Target: after attack repetitions.
 - Average Resulting Damage Total: after counting in multiple targets.
@@ -138,7 +150,6 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
         * Rating 4: ★★★★  High (heavy hitter)
         * Rating 5: 🕱🕱🕱🕱🕱  Deadly
 - Total DPR Rating: This is an experimental field. With AOE attacks, the more enemies the more powerful the spell is, but any spell with more than 3 targets ends up rating as Deadly with the current math. I am not sure if this is a correct interpretation, or if I should modify the math to account for AOE...
-- Notes section: Just in case
 
 ## Future work
 
