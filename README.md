@@ -84,6 +84,7 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
     + Advantage
     + Disadvantage
     + Elven Accuracy
+    + Spells with no roll (like Magic Missile, Mental Prison, healing spells)
     + Saving throw spells
     + Saving throw spells with half damage on miss
     + Saving throw spells when the enemy is disadvantaged

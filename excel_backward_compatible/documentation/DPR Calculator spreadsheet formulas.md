@@ -104,6 +104,7 @@ Assume 20, w/exceptions. Such as Hexblade's Curse, Champion Fighter Improved Cri
 - DISADVANTAGE 
 - ADVANTAGE
 - ELVEN ACCURACY (Adds third d20 to advantage rolls)
+- SPELL (NO ROLL)
 - SPELL (SAVE DC)
 - SP DC MISS 1/2 DMG
 - SP DC ENEMY DVG
@@ -112,6 +113,10 @@ Assume 20, w/exceptions. Such as Hexblade's Curse, Champion Fighter Improved Cri
 - SP DC M 1/2 LEG RESIST
 - SP DC EN DVG LEG RES
 - SP DC M 1/2 EN DVG L-RES
+
+```
+STANDARD,DISADVANTAGE ,ADVANTAGE,ELVEN ACCURACY,SPELL (NO ROLL),SPELL (SAVE DC),SP DC MISS 1/2 DMG,SP DC ENEMY DVG,SP DC M 1/2 ENEMY DVG,SP DC LEGEND RESIST,SP DC M 1/2 LEG RESIST,SP DC EN DVG LEG RES,SP DC M 1/2 EN DVG L-RES
+```
 
 <a id="dice-rolls"></a>
 ### Dice rolls
@@ -606,7 +611,7 @@ Chadv=Cadv+((2*(1-C)/20)-(1/(20^2)))*C
 Lucky Feat ADVANTAGE/DISADVANTAGE Halfling:
 Chsadv=Csadv+((3*(1-C)/20)-(1/20^3))*C
 
-Saving throw Spells:
+Saving throw Spells and Auto Hit spells:
 Csp=0
 ```
 
@@ -741,6 +746,7 @@ Cell formula:
             *
             (1-(([@[Min to Crit]]-1)/20))),
         OR(
+            [@Accuracy]="SPELL (NO ROLL)",
             [@Accuracy]="SPELL (SAVE DC)",
             [@Accuracy]="SP DC MISS 1/2 DMG",
             [@Accuracy]="SP DC ENEMY DVG",
@@ -750,7 +756,8 @@ Cell formula:
             [@Accuracy]="SP DC EN DVG LEG RES",
             [@Accuracy]="SP DC M 1/2 EN DVG L-RES"
         ),
-            N("No crits for save throw spells")+0
+            N("No crits for save throw spells")+
+            N("No crits for auto hit spells either")+0
     )
 )
 *
@@ -821,6 +828,9 @@ Hspadv=1-(1-H)^2
 
 Saving throw spells with enemy legendary resistance:
 Hsplr=0 (count 3)
+
+Spells with no roll:
+Hspauto=1
 ```
 
 Cell formula:
@@ -983,7 +993,10 @@ Cell formula:
         ),
         ([@[Legendary Resistances Left]]>0)
     ),
-        N("Legendary Resistance is a guaranteed miss")+0
+        N("Legendary Resistance is a guaranteed miss")+0,
+    [@Accuracy]="SPELL (NO ROLL)",
+        N("Spells without roll 100% hit")+
+        1
 )
 *
 IF(
