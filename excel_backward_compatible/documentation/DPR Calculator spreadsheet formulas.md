@@ -2020,35 +2020,73 @@ Healing Accuracy is usually just `SPELL (NO ROLL)`
 
 ```
 [Average Resulting Heal per Target]
-=(
-    N("Average dice roll")+
-    IF(COUNT(SEARCH("d",[@[Healing Dice]]))>0,
-        ((
-            N("Number of Dice")+
-            N("Left of cell from position of 'd' in the string")+
-            LEFT([@[Healing Dice]],(SEARCH("d",[@[Healing Dice]])-1))
-        )
+=N("Heal per Action per Target")+
+(
+    (
+        [@[Crit % Chance]]
         *
         (
-            N("Average roll for the die size")+
-            AVERAGE(
-                N("Lowest roll possible")+
-                1,
-                N("Die size")+
-                N("Right of cell from position x in the string.")+
-                RIGHT([@[Healing Dice]],(LEN([@[Healing Dice]])-SEARCH("d",[@[Healing Dice]])))
-            ))
-        ),
-        (N("0 if no dice found.")+0)
+            N("Average dice roll")+
+            IF(COUNT(SEARCH("d",[@[Healing Dice]]))>0,
+                ((
+                    N("Number of Dice")+
+                    N("Left of cell from position of 'd' in the string")+
+                    LEFT([@[Healing Dice]],(SEARCH("d",[@[Healing Dice]])-1))
+                )
+                *
+                (
+                    N("Average roll for the die size")+
+                    AVERAGE(
+                        N("Lowest roll possible")+
+                        1,
+                        N("Die size")+
+                        N("Right of cell from position x in the string.")+
+                        RIGHT([@[Healing Dice]],(LEN([@[Healing Dice]])-SEARCH("d",[@[Healing Dice]])))
+                    ))
+                ),
+                (N("0 if no dice found.")+0)
+            )
+        )
     )
     +
-    IF(
-        ISNUMBER([@[Healing Flat Bonus]]),
-        [@[Healing Flat Bonus]],
-        0
+    (
+        (N("H: Hit chance (including crit)")+
+        [@[Hit % Chance]])
+        *
+        (
+            (N("D: Average damage on hit")+
+            (
+                N("Average dice roll")+
+                IF(COUNT(SEARCH("d",[@[Healing Dice]]))>0,
+                    ((
+                        N("Number of Dice")+
+                        N("Left of cell from position of 'd' in the string")+
+                        LEFT([@[Healing Dice]],(SEARCH("d",[@[Healing Dice]])-1))
+                    )
+                    *
+                    (
+                        N("Average roll for the die size")+
+                        AVERAGE(
+                            N("Lowest roll possible")+
+                            1,
+                            N("Die size")+
+                            N("Right of cell from position x in the string.")+
+                            RIGHT([@[Healing Dice]],(LEN([@[Healing Dice]])-SEARCH("d",[@[Healing Dice]])))
+                        ))
+                    ),
+                    (N("0 if no dice found.")+0)
+                )
+            ))
+            +
+            (N("B: Bonus modifiers")+
+            IF(
+                ISNUMBER([@[Healing Flat Bonus]]),
+                [@[Healing Flat Bonus]],
+                0
+            ))
+        )
     )
 )
-
 ```
 
 <a id="average-resulting-heal-total"></a>

@@ -1968,17 +1968,31 @@ Healing Accuracy is usually just `SPELL (NO ROLL)`
 
 ```
 [Average Resulting Heal per Target]
-=(
-    N("Average dice roll")+
-    DiceSumAverage([@[Healing Dice]])
+=N("Heal per Action per Target")+
+(
+    (
+        [@[Crit % Chance]]
+        *
+        DiceSumAverage([@[Healing Dice]])
+    )
     +
-    IF(
-        ISNUMBER([@[Healing Flat Bonus]]),
-        [@[Healing Flat Bonus]],
-        0
+    (
+        (N("H: Hit chance (including crit)")+
+        [@[Hit % Chance]])
+        *
+        (
+            (N("D: Average damage on hit")+
+            DiceSumAverage([@[Healing Dice]]))
+            +
+            (N("B: Bonus modifiers")+
+            IF(
+                ISNUMBER([@[Healing Flat Bonus]]),
+                [@[Healing Flat Bonus]],
+                0
+            ))
+        )
     )
 )
-
 ```
 
 <a id="average-resulting-heal-total"></a>
