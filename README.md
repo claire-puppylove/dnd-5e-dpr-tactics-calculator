@@ -100,7 +100,10 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
 - Dice that you only roll on crits but you don't multiply (like Savage Attacks)
 - Dice that can't be multiplied even if you crit (like Booming Blade)
 - Bonus flat damage: Put your damage modifiers here, except for the GWM+10 that gets auto-added on another column
-- **Retaliatory dice damage** for when getting hit while you have Fire Shield cast. Flat damage is also possible for Armor of Agathys and such.
+- **Retaliatory damage dice and flat bonus** for when getting hit while you have Fire Shield cast. Flat damage only is also possible for Armor of Agathys and such.
+    + Needs your AC
+    + Declare an expected Enemy Accuracy.
+- **Healing dice and flat bonus**: For spells that do healing (either only healing or also damage), they get a section for expected healing for the average player.
 - *Elemental Adept Feat* options: If the damage type matches, all your ones turn into twos. You get an extra 1/DieSize average damage per die.
     + Damage types for all your dice (for the elemental adept feat, or your own satisfaction)
 
@@ -131,7 +134,13 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
 - Average Damage on Miss: useful for those half damage spells
     + **Save throw spells miss damage**: This function I didn't see in many other places. My calculator outputs the average damage on a miss and multiplies it by the probability of a miss, and adds it to the damage calculations.
 
-Main results:
+Healing results:
+
+- Basically all the same categories as Damage results.
+- **HPR HP% Rating**: Instead of a 5 star rating system, I opted to calculate player HP % considering the Max HP of the average player at that level.
+    + Here, the average player is average of all Hit Die (6+8+10+12)/4=?d9 and assuming a +2 CON stat, at a given player level.
+
+Damage results:
 
 - Damage per Attack: confirm before counting repetitions or multiple AOE targets.
 - Average Resulting Damage per Target: after attack repetitions.

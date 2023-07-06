@@ -68,6 +68,19 @@
     - [DPR per Target Rating](#dpr-per-target-rating)
     - [DPR Rating when attacking several targets](#dpr-rating-when-attacking-several-targets)
     - [DPR Rating Descriptions](#dpr-rating-descriptions)
+- [Healing spells, or spells that give HP](#healing-spells-or-spells-that-give-hp)
+    - [Average Resulting Heal per Target](#average-resulting-heal-per-target)
+    - [Average Resulting Heal Total](#average-resulting-heal-total)
+    - [Average Round Heal per Target](#average-round-heal-per-target)
+    - [Average Round Heal Total](#average-round-heal-total)
+    - [Average Tactic Heal per Target](#average-tactic-heal-per-target)
+    - [Average Tactic Heal Total](#average-tactic-heal-total)
+    - [Heal per Round per Target](#heal-per-round-per-target)
+    - [Total Heal per Round](#total-heal-per-round)
+- [HPR Rating](#hpr-rating)
+    - [Max Expected Player HP at CR or LV](#max-expected-player-hp-at-cr-or-lv)
+    - [HPR per Target Rating](#hpr-per-target-rating)
+    - [HPR Rating when healing several targets](#hpr-rating-when-healing-several-targets)
 
 <!-- /MarkdownTOC -->
 
@@ -1624,7 +1637,13 @@ N("Retaliatory dice damage gets added here")+
 (
     [@[Enemy Hit % Chance]]
     *
-    [@[Average Damage on Retaliatory Dice]]
+    (
+        [@[Average Damage on Retaliatory Dice]]
+        +
+        (IF(ISNUMBER([@[Retaliation Flat Dmg on Enemy Hit]]),
+            [@[Retaliation Flat Dmg on Enemy Hit]],
+            0))
+    )
 )
 ```
 
@@ -1642,7 +1661,13 @@ N("Retaliatory dice damage gets added here")+
         (
             [@[Enemy Hit % Chance]]
             *
-            [@[Average Damage on Retaliatory Dice]]
+            (
+                [@[Average Damage on Retaliatory Dice]]
+                +
+                (IF(ISNUMBER([@[Retaliation Flat Dmg on Enemy Hit]]),
+                    [@[Retaliation Flat Dmg on Enemy Hit]],
+                    0))
+            )
         ))
     )
     *
@@ -1654,7 +1679,13 @@ N("Retaliatory dice damage gets added here, but it doesn't get multiplied by tar
 (
     [@[Enemy Hit % Chance]]
     *
-    [@[Average Damage on Retaliatory Dice]]
+    (
+        [@[Average Damage on Retaliatory Dice]]
+        +
+        (IF(ISNUMBER([@[Retaliation Flat Dmg on Enemy Hit]]),
+            [@[Retaliation Flat Dmg on Enemy Hit]],
+            0))
+    )
 )
 ```
 
@@ -1698,12 +1729,19 @@ Check if max row index for the current Tactic ID or (rounds with same tactic ID)
 ```
 [Average Round Damage Total]
 =IF(
-    ISNUMBER([@[Average Round Damage per Target]]),
+    MAXIFS(
+        [[Row]:[Row]],
+        [[Tactic ID]:[Tactic ID]],[@[Tactic ID]],
+        [[Round]:[Round]],[@Round]
+    )=[@Row],
     (
-        [@[Average Round Damage per Target]]
-        *
-        (N("AOE: Area of Effect targets (must have the same bonuses applied)")+
-        IF(ISNUMBER([@[Area of Effect Expected Targets]]),[@[Area of Effect Expected Targets]],1))
+        N("Leave blank if not the last on the list for this round")+
+        N("Sum the attacks with the same tactic AND round number")+
+        SUMIFS(
+            [[Average Resulting Damage Total]:[Average Resulting Damage Total]],
+            [[Tactic ID]:[Tactic ID]],[@[Tactic ID]],
+            [[Round]:[Round]],[@Round]
+        )
     ),
     "-"
 )
@@ -1835,8 +1873,8 @@ Turns out:
 
 - Low DPR: MaxEnemyHP/24
 - Target DPR: MaxEnemyHP/12
-- Low DPR: MaxEnemyHP/6
-- Low DPR: MaxEnemyHP/3
+- High DPR: MaxEnemyHP/6
+- Dude Stop DPR: MaxEnemyHP/3
 
 <a id="max-expected-enemy-hp-at-cr-or-lv"></a>
 ### Max Expected Enemy HP at CR or LV
@@ -1970,3 +2008,302 @@ Ratings
 3: ★★★☆  Target (expected)  
 4: ★★★★  High (heavy hitter)  
 5: 🕱🕱🕱🕱🕱  Deadly  
+
+
+<a id="healing-spells-or-spells-that-give-hp"></a>
+## Healing spells, or spells that give HP
+
+Healing Accuracy is usually just `SPELL (NO ROLL)`
+
+<a id="average-resulting-heal-per-target"></a>
+### Average Resulting Heal per Target
+
+```
+[Average Resulting Heal per Target]
+=(
+    N("Average dice roll")+
+    IF(COUNT(SEARCH("d",[@[Healing Dice]]))>0,
+        ((
+            N("Number of Dice")+
+            N("Left of cell from position of 'd' in the string")+
+            LEFT([@[Healing Dice]],(SEARCH("d",[@[Healing Dice]])-1))
+        )
+        *
+        (
+            N("Average roll for the die size")+
+            AVERAGE(
+                N("Lowest roll possible")+
+                1,
+                N("Die size")+
+                N("Right of cell from position x in the string.")+
+                RIGHT([@[Healing Dice]],(LEN([@[Healing Dice]])-SEARCH("d",[@[Healing Dice]])))
+            ))
+        ),
+        (N("0 if no dice found.")+0)
+    )
+    +
+    IF(
+        ISNUMBER([@[Healing Flat Bonus]]),
+        [@[Healing Flat Bonus]],
+        0
+    )
+)
+
+```
+
+<a id="average-resulting-heal-total"></a>
+### Average Resulting Heal Total
+
+```
+[Average Resulting Heal Total]
+
+=N("Heal per target*NumTargets")+
+(
+    ([@[Average Resulting Heal per Target]])
+    *
+    (N("AOE: Area of Effect targets (must have the same bonuses applied)")+
+    IF(ISNUMBER([@[Area of Effect Expected Targets]]),[@[Area of Effect Expected Targets]],1))
+)
+```
+
+<a id="average-round-heal-per-target"></a>
+### Average Round Heal per Target
+
+```
+[Average Round Heal per Target]
+=IF(
+    MAXIFS(
+        [[Row]:[Row]],
+        [[Tactic ID]:[Tactic ID]],[@[Tactic ID]],
+        [[Round]:[Round]],[@Round]
+    )=[@Row],
+    (
+        N("Leave blank if not the last on the list for this round")+
+        N("Sum the heals with the same tactic AND round number")+
+        SUMIFS(
+            [[Average Resulting Heal per Target]:[Average Resulting Heal per Target]],
+            [[Tactic ID]:[Tactic ID]],[@[Tactic ID]],
+            [[Round]:[Round]],[@Round]
+        )
+    ),
+    "-"
+)
+```
+
+<a id="average-round-heal-total"></a>
+### Average Round Heal Total
+
+```
+[Average Round Heal Total]
+=IF(
+    MAXIFS(
+        [[Row]:[Row]],
+        [[Tactic ID]:[Tactic ID]],[@[Tactic ID]],
+        [[Round]:[Round]],[@Round]
+    )=[@Row],
+    (
+        N("Leave blank if not the last on the list for this round")+
+        N("Sum the heals with the same tactic AND round number")+
+        SUMIFS(
+            [[Average Resulting Heal Total]:[Average Resulting Heal Total]],
+            [[Tactic ID]:[Tactic ID]],[@[Tactic ID]],
+            [[Round]:[Round]],[@Round]
+        )
+    ),
+    "-"
+)
+```
+
+<a id="average-tactic-heal-per-target"></a>
+### Average Tactic Heal per Target
+
+```
+[Average Tactic Heal per Target]
+=IF(
+    MAXIFS(
+        [[Row]:[Row]],
+        [[Tactic ID]:[Tactic ID]],[@[Tactic ID]]
+    )=[@Row],
+    (
+        N("Leave blank if not the last on the list for this tactic")+
+        N("Sum the attacks with the same tactic ID")+
+        SUMIFS(
+            [[Average Resulting Heal per Target]:[Average Resulting Heal per Target]],
+            [[Tactic ID]:[Tactic ID]],[@[Tactic ID]]
+        )
+    ),
+    "-"
+)
+```
+
+<a id="average-tactic-heal-total"></a>
+### Average Tactic Heal Total
+
+```
+[Average Tactic Heal Total]
+=IF(
+    MAXIFS(
+        [[Row]:[Row]],
+        [[Tactic ID]:[Tactic ID]],[@[Tactic ID]]
+    )=[@Row],
+    (
+        N("Leave blank if not the last on the list for this tactic")+
+        N("Sum the attacks with the same tactic ID")+
+        SUMIFS(
+            [[Average Resulting Heal Total]:[Average Resulting Heal Total]],
+            [[Tactic ID]:[Tactic ID]],[@[Tactic ID]]
+        )
+    ),
+    "-"
+)
+```
+
+<a id="heal-per-round-per-target"></a>
+### Heal per Round per Target
+
+```
+[Heal per Round per Target]
+=IF(
+    ISNUMBER([@[Average Tactic Heal per Target]]),
+    (
+        N("Only show if the tactic Heal is showing a number")+
+        N("Heal per round: Heal per tactic / number of rounds")+
+        (
+            (N("Heal per tactic")+
+            [@[Average Tactic Heal per Target]])
+            /
+            (N("Number of rounds")+
+            [@Round])
+        )
+    ),
+    "-"
+)
+```
+
+<a id="total-heal-per-round"></a>
+### Total Heal per Round
+
+```
+[Total Heal per Round]
+=IF(
+    ISNUMBER([@[Average Tactic Heal Total]]),
+    (
+        N("Only show if the tactic Heal is showing a number")+
+        N("Heal per round: Heal per tactic / number of rounds")+
+        (
+            (N("Heal per tactic")+
+            [@[Average Tactic Heal Total]])
+            /
+            (N("Number of rounds")+
+            [@Round])
+        )
+    ),
+    "-"
+)
+```
+
+<a id="hpr-rating"></a>
+## HPR Rating
+
+Now, this is a personal rating and not directly quoting RPGBOT, but inspired by that rating system. I'm going to assume the average of all hit dice, with an average CON mod of +2, and then get the expected HP at that level.
+
+<a id="max-expected-player-hp-at-cr-or-lv"></a>
+### Max Expected Player HP at CR or LV
+
+Now, there being d6,d8,d10 and d12 hit dice, the average player has a d9 Hit Die (I know it's not in the game, lol).
+
+`MaxHP=HitDieMax+((HitDieMax + CON)*(LV-1))`
+
+Which, with my assumed d9 hit die and +2 CON:
+
+```
+[Max Expected Player HP at LV]
+=IFS(
+    [@[LV or CR]]=1,  9,
+    [@[LV or CR]]=2,  20,
+    [@[LV or CR]]=3,  31,
+    [@[LV or CR]]=4,  42,
+    [@[LV or CR]]=5,  53,
+    [@[LV or CR]]=6,  64,
+    [@[LV or CR]]=7,  75,
+    [@[LV or CR]]=8,  86,
+    [@[LV or CR]]=9,  97,
+    [@[LV or CR]]=10, 108,
+    [@[LV or CR]]=11, 119,
+    [@[LV or CR]]=12, 130,
+    [@[LV or CR]]=13, 141,
+    [@[LV or CR]]=14, 152,
+    [@[LV or CR]]=15, 163,
+    [@[LV or CR]]=16, 174,
+    [@[LV or CR]]=17, 185,
+    [@[LV or CR]]=18, 196,
+    [@[LV or CR]]=19, 207,
+    [@[LV or CR]]=20, 218
+)
+```
+
+<a id="hpr-per-target-rating"></a>
+### HPR per Target Rating
+
+Now consider the potions.
+
+At tier 1 you get the Healing Potion 2d4+2, which averages to 7 HP.
+At LV1 that's 77% of your HP.
+At LV2 that's 35%
+At LV3 that's 22%
+At LV4 that's 16%
+
+At LV5 which is tier 2, it heals 13% and the game introduces the Potion of Greater Healing (4d4+4 avg:14). Which is now 26% of your HP.
+
+I'll take this to mean heals below 15% are just a bit of help and not the target heal.
+
+Let's continue thinking:
+At LV6 Greater Healing grants 22%
+At LV7 that's 18%
+At LV8 that's 16%
+At LV9 that's 14%
+At LV10 that's 12%
+
+Then tier 3 introduces the Superior Healing potion which heals (8d4+8 avg 28 HP).
+
+LV11: 23%
+LV12: 21%
+LV13: 20%
+LV14: 18%
+...
+
+And so on...
+
+I think a percentage heal for the expected HP would be more appropriate than a 5 star rating system, so I will do that instead!
+
+```
+[HPR HP% per Target]
+=IF(
+    ISNUMBER([@[Heal per Round per Target]]),
+    (
+        [@[Heal per Round per Target]]
+        /
+        [@[Max Expected Player HP at LV]]
+    ),
+    "-"
+)
+```
+
+<a id="hpr-rating-when-healing-several-targets"></a>
+### HPR Rating when healing several targets
+
+The more heal the better!
+
+```
+[Total HPR HP%]
+=IF(
+    ISNUMBER([@[Total Heal per Round]]),
+    (
+        [@[Total Heal per Round]]
+        /
+        [@[Max Expected Player HP at LV]]
+    ),
+    "-"
+)
+```
+
