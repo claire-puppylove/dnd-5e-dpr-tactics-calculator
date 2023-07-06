@@ -142,6 +142,8 @@ Healing results:
 - **HPR HP% Rating**: Instead of a 5 star rating system, I opted to calculate player HP % considering the Max HP of the average player at that level.
     + Here, the average player is average of all Hit Die (6+8+10+12)/4=?d9 and assuming a +2 CON stat, at a given player level.
 - **Self Heal HP%**: If you put your character HP max in the manual input, this gives you more detailed information.
+    + per action
+    + per tactic/rounds (HPR)
 
 Damage results:
 

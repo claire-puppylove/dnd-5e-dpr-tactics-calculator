@@ -2351,6 +2351,23 @@ The more heal the better!
 
 Instead of expected HP, it uses the manual input HP if defined.
 
+Per Action:
+
+```
+[Self Heal Action HP%]
+=IF(
+    ISNUMBER([@[Character HP Max]]),
+    (
+        [@[Average Resulting Heal per Target]]
+        /
+        [@[Character HP Max]]
+    ),
+    "-"
+)
+```
+
+
+Per Round:
 
 ```
 [HPR Self HP%]
