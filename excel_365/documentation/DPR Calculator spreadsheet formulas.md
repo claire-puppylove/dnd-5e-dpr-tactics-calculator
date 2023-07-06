@@ -82,8 +82,11 @@
     - [Average Tactic Heal Total](#average-tactic-heal-total)
     - [Heal per Round per Target](#heal-per-round-per-target)
     - [Total Heal per Round](#total-heal-per-round)
-- [HPR Rating](#hpr-rating)
+- [Heal Rating](#heal-rating)
     - [Max Expected Player HP at CR or LV](#max-expected-player-hp-at-cr-or-lv)
+    - [Rating the Healing](#rating-the-healing)
+    - [Heal Average HP% per Target](#heal-average-hp-per-target)
+    - [Heal average HP% total](#heal-average-hp-total)
     - [HPR per Target Rating](#hpr-per-target-rating)
     - [HPR Rating when healing several targets](#hpr-rating-when-healing-several-targets)
     - [HPR Rating when healing yourself](#hpr-rating-when-healing-yourself)
@@ -2147,8 +2150,8 @@ Healing Accuracy is usually just `SPELL (NO ROLL)`
 )
 ```
 
-<a id="hpr-rating"></a>
-## HPR Rating
+<a id="heal-rating"></a>
+## Heal Rating
 
 Now, this is a personal rating and not directly quoting RPGBOT, but inspired by that rating system. I'm going to assume the average of all hit dice, with an average CON mod of +2, and then get the expected HP at that level.
 
@@ -2187,8 +2190,8 @@ Which, with my assumed d9 hit die and +2 CON:
 )
 ```
 
-<a id="hpr-per-target-rating"></a>
-### HPR per Target Rating
+<a id="rating-the-healing"></a>
+### Rating the Healing
 
 Now consider the potions.
 
@@ -2220,6 +2223,33 @@ LV14: 18%
 And so on...
 
 I think a percentage heal for the expected HP would be more appropriate than a 5 star rating system, so I will do that instead!
+
+<a id="heal-average-hp-per-target"></a>
+### Heal Average HP% per Target
+
+```
+[Heal Average HP% per Target]
+=(
+    [@[Average Resulting Heal per Target]]
+    /
+    [@[Max Expected Player HP at LV]]
+)
+```
+
+<a id="heal-average-hp-total"></a>
+### Heal average HP% total
+
+```
+[Heal Average HP% Total]
+=(
+    [@[Average Resulting Heal Total]]
+    /
+    [@[Max Expected Player HP at LV]]
+)
+```
+
+<a id="hpr-per-target-rating"></a>
+### HPR per Target Rating
 
 ```
 [HPR HP% per Target]
