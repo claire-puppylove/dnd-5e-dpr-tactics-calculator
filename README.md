@@ -105,6 +105,7 @@ Since I was inspired by RPGBOT, most of the initial functions are the same, but 
     + Declare an expected Enemy Accuracy.
 - **Healing dice and flat bonus**: For spells that do healing (either only healing or also damage), they get a section for expected healing for the average player.
     + Note: to heal half the dice such as in Vampiric Touch, you write half the dice notation (e.g. 5d6 -> 2.5d6) and the calculations are done normally.
+    + Optional: Character HP Max: for self heal HP%
 - *Elemental Adept Feat* options: If the damage type matches, all your ones turn into twos. You get an extra 1/DieSize average damage per die.
     + Damage types for all your dice (for the elemental adept feat, or your own satisfaction)
 
@@ -140,6 +141,7 @@ Healing results:
 - Basically all the same categories as Damage results.
 - **HPR HP% Rating**: Instead of a 5 star rating system, I opted to calculate player HP % considering the Max HP of the average player at that level.
     + Here, the average player is average of all Hit Die (6+8+10+12)/4=?d9 and assuming a +2 CON stat, at a given player level.
+- **Self Heal HP%**: If you put your character HP max in the manual input, this gives you more detailed information.
 
 Damage results:
 

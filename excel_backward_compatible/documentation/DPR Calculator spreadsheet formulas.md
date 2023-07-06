@@ -81,6 +81,7 @@
     - [Max Expected Player HP at CR or LV](#max-expected-player-hp-at-cr-or-lv)
     - [HPR per Target Rating](#hpr-per-target-rating)
     - [HPR Rating when healing several targets](#hpr-rating-when-healing-several-targets)
+    - [HPR Rating when healing yourself](#hpr-rating-when-healing-yourself)
 
 <!-- /MarkdownTOC -->
 
@@ -2340,6 +2341,28 @@ The more heal the better!
         [@[Total Heal per Round]]
         /
         [@[Max Expected Player HP at LV]]
+    ),
+    "-"
+)
+```
+
+<a id="hpr-rating-when-healing-yourself"></a>
+### HPR Rating when healing yourself
+
+Instead of expected HP, it uses the manual input HP if defined.
+
+
+```
+[HPR Self HP%]
+=IF(
+    AND(
+        ISNUMBER([@[Heal per Round per Target]]),
+        ISNUMBER([@[Character HP Max]])
+    ),
+    (
+        [@[Heal per Round per Target]]
+        /
+        [@[Character HP Max]]
     ),
     "-"
 )
