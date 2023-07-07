@@ -236,7 +236,7 @@ function DiceAverage()
     IF(
         COUNT(SEARCH("d",dice))>0,
         NumDiceA(dice)*AVERAGE(1,DieSizeA(dice)),
-        N(dice)
+        IF(ISNUMBER(TRIM(dice)*1),(TRIM(dice)*1),0)
     )
 )
 ```
@@ -423,6 +423,51 @@ Formula:
 
 ```
 function AverageDiceDamage()
+
+=LAMBDA(
+    dicesum,
+    damage_type,
+    elemental_adept_element,
+    weapon_attack_bool,
+    great_weapon_fighting_YES_NO,
+    (
+        N("Average damage")+
+        IF(
+            COUNT(SEARCH("d",dicesum))>0,
+            (
+                N("Base damage of the dice")+
+                DiceSumAverage(dicesum)
+                +
+                N("Elemental Adept turn 1s into 2s.")+
+                N("Average increases by 1/DieSize per die")+
+                N("Condition: damage type matches EA type.")+
+                IF(
+                    damage_type=elemental_adept_element,
+                    DiceSumLowerCapDiff(dicesum,2),
+                    (N("0 if no Elemental Adept applies.")+0)
+                )
+                +
+                IF(
+                    weapon_attack_bool=True,
+                    (
+                        N("Great Weapon Fighting style reroll 1s and 2s once.")+
+                        IF(
+                            great_weapon_fighting_YES_NO="YES",
+                            DiceSumAverageRerollLowestDiff(dicesum,2),
+                            (N("0 if no Great Weapon Fighting style applies.")+0)
+                        )
+                    )
+                )
+            ),
+            N(dicesum)
+        )
+    )
+)
+```
+
+
+```
+function AverageDiceDamageA()
 
 =LAMBDA(
     dicesum,
