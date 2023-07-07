@@ -28,6 +28,10 @@ The Microsoft 365 spreadsheet can read added dice notation (e.g. 1d8+1d4).
 
 However if you don't have 365 the online free version should suffice.
 
+## Usage
+
+There's a manual input preparation spreadsheet for each version. Make sure to fill this one out first before using the calculator, because it gets pretty heavy and it can crash if you keep moving rows around or decide to cut and paste to add rows and such. Once you have all your input ready, you can copy paste the content to the actual calculator file.
+
 ## Documentation
 
 I made note of all the formulas in an easier-to-read format.
