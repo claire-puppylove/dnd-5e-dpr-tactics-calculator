@@ -174,7 +174,8 @@ Damage results:
 
 ## Future work
 
-In the future, I plan to make a python version that takes CSV files as input to be free of proprietary software.
+- Damage type summation?
+- In the future, I plan to make a python version that takes CSV files as input to be free of proprietary software.
 
 ## References
 
